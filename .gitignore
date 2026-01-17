@@ -1,3 +1,6 @@
+# Project planning docs (local only)
+DEVELOPMENT_PLAN.md
+
 # Miscellaneous
 *.class
 *.log
@@ -43,3 +46,4 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+macos/Runner/Resources/client_secret.json

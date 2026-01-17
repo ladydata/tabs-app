@@ -18,6 +18,9 @@ _$ExpenseImpl _$$ExpenseImplFromJson(Map<String, dynamic> json) =>
       exchangeRate: (json['exchangeRate'] as num).toDouble(),
       date: const TimestampConverter().fromJson(json['date']),
       paidBy: json['paidBy'] as String,
+      payers: (json['payers'] as Map<String, dynamic>).map(
+        (k, e) => MapEntry(k, (e as num).toDouble()),
+      ),
       splits: (json['splits'] as Map<String, dynamic>).map(
         (k, e) => MapEntry(k, ExpenseSplit.fromJson(e as Map<String, dynamic>)),
       ),
@@ -38,6 +41,7 @@ Map<String, dynamic> _$$ExpenseImplToJson(_$ExpenseImpl instance) =>
       'exchangeRate': instance.exchangeRate,
       'date': const TimestampConverter().toJson(instance.date),
       'paidBy': instance.paidBy,
+      'payers': instance.payers,
       'splits': instance.splits,
       'createdBy': instance.createdBy,
       'createdAt': const TimestampConverter().toJson(instance.createdAt),

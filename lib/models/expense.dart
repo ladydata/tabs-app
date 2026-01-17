@@ -19,6 +19,7 @@ class Expense with _$Expense {
     required double exchangeRate,
     @TimestampConverter() required DateTime date,
     required String paidBy,
+    required Map<String, double> payers, // userId -> amount in original currency
     required Map<String, ExpenseSplit> splits,
     required String createdBy,
     @TimestampConverter() required DateTime createdAt,
@@ -37,17 +38,30 @@ class Expense with _$Expense {
       ExpenseSplit.fromJson(value as Map<String, dynamic>),
     ));
 
+    // Parse payers map, with fallback to legacy single paidBy field
+    final amount = (data['amount'] as num).toDouble();
+    final paidBy = data['paidBy'] as String;
+    Map<String, double> payers;
+    if (data['payers'] != null) {
+      final payersData = data['payers'] as Map<String, dynamic>;
+      payers = payersData.map((key, value) => MapEntry(key, (value as num).toDouble()));
+    } else {
+      // Backward compatibility: construct payers from legacy paidBy field
+      payers = {paidBy: amount};
+    }
+
     return Expense(
       id: doc.id,
       groupId: groupId,
       title: data['title'] as String,
       notes: data['notes'] as String?,
-      amount: (data['amount'] as num).toDouble(),
+      amount: amount,
       currency: data['currency'] as String,
       convertedAmount: (data['convertedAmount'] as num).toDouble(),
       exchangeRate: (data['exchangeRate'] as num).toDouble(),
       date: (data['date'] as Timestamp).toDate(),
-      paidBy: data['paidBy'] as String,
+      paidBy: paidBy,
+      payers: payers,
       splits: splits,
       createdBy: data['createdBy'] as String,
       createdAt: (data['createdAt'] as Timestamp).toDate(),

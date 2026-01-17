@@ -25,11 +25,21 @@ class AppRoutes {
   static const activity = '/groups/:groupId/activity';
 }
 
+class AuthNotifierListenable extends ChangeNotifier {
+  AuthNotifierListenable(Ref ref) {
+    ref.listen(authStateProvider, (_, __) {
+      notifyListeners();
+    });
+  }
+}
+
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
+  final notifier = AuthNotifierListenable(ref);
 
   return GoRouter(
     initialLocation: AppRoutes.home,
+    refreshListenable: notifier,
     redirect: (context, state) {
       final isLoggedIn = authState.valueOrNull != null;
       final isAuthRoute = state.matchedLocation == AppRoutes.signIn ||

@@ -11,9 +11,12 @@ class BalanceService {
 
     // Process expenses
     for (final expense in expenses) {
-      // The payer is owed the converted amount
-      balances[expense.paidBy] =
-          (balances[expense.paidBy] ?? 0) + expense.convertedAmount;
+      // Each payer is credited for their payment amount (converted to group currency)
+      for (final entry in expense.payers.entries) {
+        final payerId = entry.key;
+        final paidAmount = entry.value * expense.exchangeRate;
+        balances[payerId] = (balances[payerId] ?? 0) + paidAmount;
+      }
 
       // Each person in the split owes their share
       for (final split in expense.splits.values) {

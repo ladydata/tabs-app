@@ -36,7 +36,7 @@ class ExpensesNotifier extends StateNotifier<AsyncValue<void>> {
     required double amount,
     required String currency,
     required DateTime date,
-    required String paidBy,
+    required Map<String, double> payers, // userId -> amount in original currency
     required Map<String, ExpenseSplit> splits,
   }) async {
     state = const AsyncValue.loading();
@@ -70,6 +70,9 @@ class ExpensesNotifier extends StateNotifier<AsyncValue<void>> {
         );
       }
 
+      // Determine primary payer (first one or the one with highest amount)
+      final paidBy = payers.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+
       final firestoreService = _ref.read(firestoreServiceProvider);
       final expenseId = await firestoreService.createExpense(
         groupId: groupId,
@@ -81,6 +84,7 @@ class ExpensesNotifier extends StateNotifier<AsyncValue<void>> {
         exchangeRate: exchangeRate,
         date: date,
         paidBy: paidBy,
+        payers: payers,
         splits: convertedSplits,
         createdBy: user.uid,
       );
@@ -117,7 +121,7 @@ class ExpensesNotifier extends StateNotifier<AsyncValue<void>> {
     double? amount,
     String? currency,
     DateTime? date,
-    String? paidBy,
+    Map<String, double>? payers, // userId -> amount in original currency
     Map<String, ExpenseSplit>? splits,
   }) async {
     state = const AsyncValue.loading();
@@ -166,6 +170,12 @@ class ExpensesNotifier extends StateNotifier<AsyncValue<void>> {
         }
       }
 
+      // Determine primary payer if payers changed
+      String? paidBy;
+      if (payers != null) {
+        paidBy = payers.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+      }
+
       final firestoreService = _ref.read(firestoreServiceProvider);
       await firestoreService.updateExpense(
         groupId: groupId,
@@ -178,6 +188,7 @@ class ExpensesNotifier extends StateNotifier<AsyncValue<void>> {
         exchangeRate: exchangeRate,
         date: date,
         paidBy: paidBy,
+        payers: payers,
         splits: convertedSplits,
       );
 

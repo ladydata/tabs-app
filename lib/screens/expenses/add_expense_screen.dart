@@ -34,7 +34,8 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
 
   String _selectedCurrency = 'USD';
   DateTime _selectedDate = DateTime.now();
-  String? _paidBy;
+  Map<String, bool> _selectedPayers = {};
+  Map<String, TextEditingController> _payerAmountControllers = {};
   SplitType _splitType = SplitType.equal;
   Map<String, bool> _selectedMembers = {};
   Map<String, TextEditingController> _splitControllers = {};
@@ -49,6 +50,9 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
     _amountController.dispose();
     _notesController.dispose();
     for (final controller in _splitControllers.values) {
+      controller.dispose();
+    }
+    for (final controller in _payerAmountControllers.values) {
       controller.dispose();
     }
     super.dispose();
@@ -77,12 +81,17 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
 
   Widget _buildForm(BuildContext context, ExpenseGroup group) {
     // Initialize state based on group
-    if (_paidBy == null) {
+    if (_selectedPayers.isEmpty) {
       final currentUser = ref.read(currentUserProvider);
-      _paidBy = currentUser?.uid;
       _selectedCurrency = group.currency;
 
-      // Initialize selected members
+      // Initialize payers (default to current user)
+      for (final memberId in group.memberIds) {
+        _selectedPayers[memberId] = memberId == currentUser?.uid;
+        _payerAmountControllers[memberId] = TextEditingController();
+      }
+
+      // Initialize selected members for splits
       for (final memberId in group.memberIds) {
         _selectedMembers[memberId] = true;
         _splitControllers[memberId] = TextEditingController();
@@ -243,23 +252,40 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
             const SizedBox(height: 24),
 
             // Paid by
-            Text(
-              'Paid by',
-              style: Theme.of(context).textTheme.titleMedium,
+            Row(
+              children: [
+                Text(
+                  'Paid by',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const Spacer(),
+                if (_selectedPayerCount > 1)
+                  TextButton.icon(
+                    onPressed: () => _splitPayersEvenly(group),
+                    icon: const Icon(Icons.drag_handle, size: 18),
+                    label: const Text('Split evenly'),
+                  ),
+              ],
             ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: group.members.entries.map((entry) {
-                final isSelected = _paidBy == entry.key;
-                return ChoiceChip(
+                final isSelected = _selectedPayers[entry.key] ?? false;
+                return FilterChip(
                   label: Text(entry.value.displayName),
                   selected: isSelected,
                   onSelected: (selected) {
-                    if (selected) {
-                      setState(() => _paidBy = entry.key);
-                    }
+                    setState(() {
+                      _selectedPayers[entry.key] = selected;
+                      if (!selected) {
+                        _payerAmountControllers[entry.key]?.clear();
+                      } else if (_selectedPayerCount == 1) {
+                        // Auto-fill amount for single payer
+                        _payerAmountControllers[entry.key]?.text = _amountController.text;
+                      }
+                    });
                   },
                   selectedColor: AppColors.primary,
                   labelStyle: TextStyle(
@@ -268,6 +294,18 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                 );
               }).toList(),
             ),
+
+            // Payer amounts (shown when multiple payers or single payer selected)
+            if (_selectedPayerCount > 0) ...[
+              const SizedBox(height: 16),
+              ...group.members.entries
+                  .where((e) => _selectedPayers[e.key] ?? false)
+                  .map((entry) => _buildPayerAmountInput(entry.key, entry.value.displayName, group)),
+              if (_selectedPayerCount > 1) ...[
+                const SizedBox(height: 8),
+                _buildPayerTotalValidation(group),
+              ],
+            ],
 
             const SizedBox(height: 24),
 
@@ -374,6 +412,118 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
     );
   }
 
+  int get _selectedPayerCount =>
+      _selectedPayers.values.where((v) => v).length;
+
+  void _splitPayersEvenly(ExpenseGroup group) {
+    final amountText = _amountController.text;
+    if (amountText.isEmpty) return;
+
+    final amount = double.tryParse(amountText);
+    if (amount == null) return;
+
+    final selectedPayerIds = _selectedPayers.entries
+        .where((e) => e.value)
+        .map((e) => e.key)
+        .toList();
+
+    if (selectedPayerIds.isEmpty) return;
+
+    final amountPerPayer = amount / selectedPayerIds.length;
+    for (final payerId in selectedPayerIds) {
+      _payerAmountControllers[payerId]?.text = amountPerPayer.toStringAsFixed(2);
+    }
+    setState(() {});
+  }
+
+  Widget _buildPayerAmountInput(String memberId, String displayName, ExpenseGroup group) {
+    final controller = _payerAmountControllers[memberId]!;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: AppColors.primaryLight,
+            child: Text(
+              displayName.substring(0, 1).toUpperCase(),
+              style: const TextStyle(color: AppColors.primaryDark, fontSize: 14),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(displayName),
+          ),
+          SizedBox(
+            width: 120,
+            child: TextField(
+              controller: controller,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+              ],
+              decoration: InputDecoration(
+                isDense: true,
+                prefixText: '${ExchangeRateService.getCurrencySymbol(_selectedCurrency)} ',
+                hintText: '0.00',
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPayerTotalValidation(ExpenseGroup group) {
+    final amountText = _amountController.text;
+    final totalAmount = double.tryParse(amountText) ?? 0;
+
+    double payerTotal = 0;
+    for (final entry in _selectedPayers.entries) {
+      if (entry.value) {
+        final payerAmount = double.tryParse(_payerAmountControllers[entry.key]?.text ?? '') ?? 0;
+        payerTotal += payerAmount;
+      }
+    }
+
+    final difference = totalAmount - payerTotal;
+    final isValid = difference.abs() < 0.01;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isValid
+            ? AppColors.success.withOpacity(0.1)
+            : AppColors.error.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isValid ? Icons.check_circle : Icons.warning,
+            size: 20,
+            color: isValid ? AppColors.success : AppColors.error,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              isValid
+                  ? 'Payer amounts match total'
+                  : 'Payer total: ${ExchangeRateService.formatAmount(payerTotal, _selectedCurrency)} '
+                      '(${difference > 0 ? "missing" : "over by"} ${ExchangeRateService.formatAmount(difference.abs(), _selectedCurrency)})',
+              style: TextStyle(
+                color: isValid ? AppColors.success : AppColors.error,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _selectCurrency(ExpenseGroup group) {
     showModalBottomSheet(
       context: context,
@@ -457,9 +607,15 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
 
   Future<void> _saveExpense(ExpenseGroup group) async {
     if (!_formKey.currentState!.validate()) return;
-    if (_paidBy == null) {
+
+    final selectedPayerIds = _selectedPayers.entries
+        .where((e) => e.value)
+        .map((e) => e.key)
+        .toList();
+
+    if (selectedPayerIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select who paid')),
+        const SnackBar(content: Text('Please select at least one payer')),
       );
       return;
     }
@@ -480,6 +636,25 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
 
     try {
       final amount = double.parse(_amountController.text);
+
+      // Build payers map
+      final payers = <String, double>{};
+      double payerTotal = 0;
+
+      for (final payerId in selectedPayerIds) {
+        final payerAmountText = _payerAmountControllers[payerId]?.text ?? '';
+        final payerAmount = double.tryParse(payerAmountText) ?? 0;
+        if (payerAmount <= 0) {
+          throw Exception('Each payer must have an amount greater than 0');
+        }
+        payers[payerId] = payerAmount;
+        payerTotal += payerAmount;
+      }
+
+      // Validate payer amounts equal expense amount
+      if ((payerTotal - amount).abs() > 0.01) {
+        throw Exception('Payer amounts must equal the expense total');
+      }
 
       // Build splits based on split type
       final splits = <String, ExpenseSplit>{};
@@ -539,7 +714,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
             amount: amount,
             currency: _selectedCurrency,
             date: _selectedDate,
-            paidBy: _paidBy!,
+            payers: payers,
             splits: splits,
           );
 

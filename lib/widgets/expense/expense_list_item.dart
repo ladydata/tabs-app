@@ -18,9 +18,12 @@ class ExpenseListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final paidByMember = group.members[expense.paidBy];
     final dateFormat = DateFormat('MMM d');
     final showOriginalCurrency = expense.currency != group.currency;
+    final payerCount = expense.payers.length;
+    final paidByText = payerCount > 1
+        ? 'Paid by $payerCount people'
+        : 'Paid by ${group.members[expense.paidBy]?.displayName ?? 'Unknown'}';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -55,11 +58,14 @@ class ExpenseListItem extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Text(
-                          'Paid by ${paidByMember?.displayName ?? 'Unknown'}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                        Flexible(
+                          child: Text(
+                            paidByText,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Text(

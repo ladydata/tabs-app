@@ -5,7 +5,10 @@ import 'package:tabs/models/user.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: '715801902844-jgdudite93hnl8j13gnt5nn0ubj7dhi2.apps.googleusercontent.com',
+    scopes: ['email', 'profile'],
+  );
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Stream of auth state changes

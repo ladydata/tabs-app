@@ -38,10 +38,21 @@ class GroupsNotifier extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
     try {
       final user = _ref.read(currentUserProvider);
-      final userProfile = await _ref.read(currentUserProfileProvider.future);
-
-      if (user == null || userProfile == null) {
+      if (user == null) {
         throw Exception('User not authenticated');
+      }
+
+      // Retry fetching user profile with delay (handles race condition after sign-in)
+      AppUser? userProfile;
+      for (int i = 0; i < 3; i++) {
+        _ref.invalidate(currentUserProfileProvider);
+        userProfile = await _ref.read(currentUserProfileProvider.future);
+        if (userProfile != null) break;
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+
+      if (userProfile == null) {
+        throw Exception('User profile not found. Please try again.');
       }
 
       final groupId = await _firestoreService.createGroup(

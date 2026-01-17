@@ -77,9 +77,9 @@ class ExpenseDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildContent(BuildContext context, ExpenseGroup group, Expense expense) {
-    final paidByMember = group.members[expense.paidBy];
     final dateFormat = DateFormat('EEEE, MMMM d, yyyy');
     final showOriginalCurrency = expense.currency != group.currency;
+    final hasMultiplePayers = expense.payers.length > 1;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -136,11 +136,53 @@ class ExpenseDetailScreen extends ConsumerWidget {
             value: dateFormat.format(expense.date),
           ),
 
-          _DetailRow(
-            icon: Icons.person_outlined,
-            label: 'Paid by',
-            value: paidByMember?.displayName ?? 'Unknown',
-          ),
+          if (!hasMultiplePayers)
+            _DetailRow(
+              icon: Icons.person_outlined,
+              label: 'Paid by',
+              value: group.members[expense.paidBy]?.displayName ?? 'Unknown',
+            ),
+
+          if (hasMultiplePayers) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Paid by',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            ...expense.payers.entries.map((entry) {
+              final member = group.members[entry.key];
+              final payerAmount = entry.value;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: AppColors.primaryLight,
+                      child: Text(
+                        member?.displayName.substring(0, 1).toUpperCase() ?? '?',
+                        style: const TextStyle(color: AppColors.primaryDark, fontSize: 14),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(member?.displayName ?? 'Unknown'),
+                    ),
+                    Text(
+                      ExchangeRateService.formatAmount(payerAmount, expense.currency),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+            const SizedBox(height: 8),
+          ],
 
           if (expense.notes != null && expense.notes!.isNotEmpty)
             _DetailRow(
@@ -163,7 +205,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
           ...expense.splits.entries.map((entry) {
             final member = group.members[entry.key];
             final split = entry.value;
-            final isPayer = entry.key == expense.paidBy;
+            final isPayer = expense.payers.containsKey(entry.key);
 
             return Card(
               margin: const EdgeInsets.only(bottom: 8),

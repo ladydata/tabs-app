@@ -171,6 +171,7 @@ class FirestoreService {
     required double exchangeRate,
     required DateTime date,
     required String paidBy,
+    required Map<String, double> payers,
     required Map<String, ExpenseSplit> splits,
     required String createdBy,
   }) async {
@@ -193,6 +194,7 @@ class FirestoreService {
       'exchangeRate': exchangeRate,
       'date': Timestamp.fromDate(date),
       'paidBy': paidBy,
+      'payers': payers,
       'splits': splitsData,
       'createdBy': createdBy,
       'createdAt': Timestamp.fromDate(now),
@@ -218,6 +220,7 @@ class FirestoreService {
     double? exchangeRate,
     DateTime? date,
     String? paidBy,
+    Map<String, double>? payers,
     Map<String, ExpenseSplit>? splits,
   }) async {
     final updates = <String, dynamic>{
@@ -231,6 +234,7 @@ class FirestoreService {
     if (exchangeRate != null) updates['exchangeRate'] = exchangeRate;
     if (date != null) updates['date'] = Timestamp.fromDate(date);
     if (paidBy != null) updates['paidBy'] = paidBy;
+    if (payers != null) updates['payers'] = payers;
     if (splits != null) {
       updates['splits'] = splits.map((key, value) => MapEntry(key, {
         'userId': value.userId,

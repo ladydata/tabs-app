@@ -32,6 +32,8 @@ mixin _$Expense {
   @TimestampConverter()
   DateTime get date => throw _privateConstructorUsedError;
   String get paidBy => throw _privateConstructorUsedError;
+  Map<String, double> get payers =>
+      throw _privateConstructorUsedError; // userId -> amount in original currency
   Map<String, ExpenseSplit> get splits => throw _privateConstructorUsedError;
   String get createdBy => throw _privateConstructorUsedError;
   @TimestampConverter()
@@ -64,6 +66,7 @@ abstract class $ExpenseCopyWith<$Res> {
     double exchangeRate,
     @TimestampConverter() DateTime date,
     String paidBy,
+    Map<String, double> payers,
     Map<String, ExpenseSplit> splits,
     String createdBy,
     @TimestampConverter() DateTime createdAt,
@@ -96,6 +99,7 @@ class _$ExpenseCopyWithImpl<$Res, $Val extends Expense>
     Object? exchangeRate = null,
     Object? date = null,
     Object? paidBy = null,
+    Object? payers = null,
     Object? splits = null,
     Object? createdBy = null,
     Object? createdAt = null,
@@ -143,6 +147,10 @@ class _$ExpenseCopyWithImpl<$Res, $Val extends Expense>
                 ? _value.paidBy
                 : paidBy // ignore: cast_nullable_to_non_nullable
                       as String,
+            payers: null == payers
+                ? _value.payers
+                : payers // ignore: cast_nullable_to_non_nullable
+                      as Map<String, double>,
             splits: null == splits
                 ? _value.splits
                 : splits // ignore: cast_nullable_to_non_nullable
@@ -184,6 +192,7 @@ abstract class _$$ExpenseImplCopyWith<$Res> implements $ExpenseCopyWith<$Res> {
     double exchangeRate,
     @TimestampConverter() DateTime date,
     String paidBy,
+    Map<String, double> payers,
     Map<String, ExpenseSplit> splits,
     String createdBy,
     @TimestampConverter() DateTime createdAt,
@@ -215,6 +224,7 @@ class __$$ExpenseImplCopyWithImpl<$Res>
     Object? exchangeRate = null,
     Object? date = null,
     Object? paidBy = null,
+    Object? payers = null,
     Object? splits = null,
     Object? createdBy = null,
     Object? createdAt = null,
@@ -262,6 +272,10 @@ class __$$ExpenseImplCopyWithImpl<$Res>
             ? _value.paidBy
             : paidBy // ignore: cast_nullable_to_non_nullable
                   as String,
+        payers: null == payers
+            ? _value._payers
+            : payers // ignore: cast_nullable_to_non_nullable
+                  as Map<String, double>,
         splits: null == splits
             ? _value._splits
             : splits // ignore: cast_nullable_to_non_nullable
@@ -297,11 +311,13 @@ class _$ExpenseImpl implements _Expense {
     required this.exchangeRate,
     @TimestampConverter() required this.date,
     required this.paidBy,
+    required final Map<String, double> payers,
     required final Map<String, ExpenseSplit> splits,
     required this.createdBy,
     @TimestampConverter() required this.createdAt,
     @TimestampConverter() required this.updatedAt,
-  }) : _splits = splits;
+  }) : _payers = payers,
+       _splits = splits;
 
   factory _$ExpenseImpl.fromJson(Map<String, dynamic> json) =>
       _$$ExpenseImplFromJson(json);
@@ -327,7 +343,17 @@ class _$ExpenseImpl implements _Expense {
   final DateTime date;
   @override
   final String paidBy;
+  final Map<String, double> _payers;
+  @override
+  Map<String, double> get payers {
+    if (_payers is EqualUnmodifiableMapView) return _payers;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(_payers);
+  }
+
+  // userId -> amount in original currency
   final Map<String, ExpenseSplit> _splits;
+  // userId -> amount in original currency
   @override
   Map<String, ExpenseSplit> get splits {
     if (_splits is EqualUnmodifiableMapView) return _splits;
@@ -346,7 +372,7 @@ class _$ExpenseImpl implements _Expense {
 
   @override
   String toString() {
-    return 'Expense(id: $id, groupId: $groupId, title: $title, notes: $notes, amount: $amount, currency: $currency, convertedAmount: $convertedAmount, exchangeRate: $exchangeRate, date: $date, paidBy: $paidBy, splits: $splits, createdBy: $createdBy, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Expense(id: $id, groupId: $groupId, title: $title, notes: $notes, amount: $amount, currency: $currency, convertedAmount: $convertedAmount, exchangeRate: $exchangeRate, date: $date, paidBy: $paidBy, payers: $payers, splits: $splits, createdBy: $createdBy, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -367,6 +393,7 @@ class _$ExpenseImpl implements _Expense {
                 other.exchangeRate == exchangeRate) &&
             (identical(other.date, date) || other.date == date) &&
             (identical(other.paidBy, paidBy) || other.paidBy == paidBy) &&
+            const DeepCollectionEquality().equals(other._payers, _payers) &&
             const DeepCollectionEquality().equals(other._splits, _splits) &&
             (identical(other.createdBy, createdBy) ||
                 other.createdBy == createdBy) &&
@@ -390,6 +417,7 @@ class _$ExpenseImpl implements _Expense {
     exchangeRate,
     date,
     paidBy,
+    const DeepCollectionEquality().hash(_payers),
     const DeepCollectionEquality().hash(_splits),
     createdBy,
     createdAt,
@@ -422,6 +450,7 @@ abstract class _Expense implements Expense {
     required final double exchangeRate,
     @TimestampConverter() required final DateTime date,
     required final String paidBy,
+    required final Map<String, double> payers,
     required final Map<String, ExpenseSplit> splits,
     required final String createdBy,
     @TimestampConverter() required final DateTime createdAt,
@@ -451,6 +480,8 @@ abstract class _Expense implements Expense {
   DateTime get date;
   @override
   String get paidBy;
+  @override
+  Map<String, double> get payers; // userId -> amount in original currency
   @override
   Map<String, ExpenseSplit> get splits;
   @override

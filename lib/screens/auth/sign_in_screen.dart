@@ -32,10 +32,24 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           _emailController.text.trim(),
           _passwordController.text,
         );
+    // Check if sign-in was successful and navigate
+    if (mounted) {
+      final user = ref.read(authStateProvider).valueOrNull;
+      if (user != null) {
+        context.go(AppRoutes.home);
+      }
+    }
   }
 
   Future<void> _signInWithGoogle() async {
     await ref.read(authNotifierProvider.notifier).signInWithGoogle();
+    // Check if sign-in was successful and navigate
+    if (mounted) {
+      final user = ref.read(authStateProvider).valueOrNull;
+      if (user != null) {
+        context.go(AppRoutes.home);
+      }
+    }
   }
 
   @override
@@ -43,7 +57,17 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final authState = ref.watch(authNotifierProvider);
     final isLoading = authState.isLoading;
 
-    ref.listen<AsyncValue<void>>(authNotifierProvider, (_, state) {
+    // Listen for auth state changes to navigate after sign-in
+    ref.listen(authStateProvider, (previous, current) {
+      current.whenData((user) {
+        if (user != null) {
+          context.go(AppRoutes.home);
+        }
+      });
+    });
+
+    // Listen for sign-in errors
+    ref.listen<AsyncValue<void>>(authNotifierProvider, (previous, state) {
       state.whenOrNull(
         error: (error, _) {
           ScaffoldMessenger.of(context).showSnackBar(
