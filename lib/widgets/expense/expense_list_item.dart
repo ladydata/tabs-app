@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:tabs/config/categories.dart';
 import 'package:tabs/config/theme.dart';
 import 'package:tabs/models/models.dart';
 import 'package:tabs/services/exchange_rate_service.dart';
@@ -111,6 +112,10 @@ class ExpenseListItem extends StatelessWidget {
   }
 
   IconData _getExpenseIcon() {
+    if (expense.category != null) {
+      return Categories.getById(expense.category).icon;
+    }
+
     final title = expense.title.toLowerCase();
     if (title.contains('food') || title.contains('dinner') || title.contains('lunch') ||
         title.contains('breakfast') || title.contains('restaurant')) {

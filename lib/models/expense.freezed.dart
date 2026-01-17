@@ -24,6 +24,7 @@ mixin _$Expense {
   String get id => throw _privateConstructorUsedError;
   String get groupId => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
+  String? get category => throw _privateConstructorUsedError;
   String? get notes => throw _privateConstructorUsedError;
   double get amount => throw _privateConstructorUsedError;
   String get currency => throw _privateConstructorUsedError;
@@ -59,6 +60,7 @@ abstract class $ExpenseCopyWith<$Res> {
     String id,
     String groupId,
     String title,
+    String? category,
     String? notes,
     double amount,
     String currency,
@@ -92,6 +94,7 @@ class _$ExpenseCopyWithImpl<$Res, $Val extends Expense>
     Object? id = null,
     Object? groupId = null,
     Object? title = null,
+    Object? category = freezed,
     Object? notes = freezed,
     Object? amount = null,
     Object? currency = null,
@@ -119,6 +122,10 @@ class _$ExpenseCopyWithImpl<$Res, $Val extends Expense>
                 ? _value.title
                 : title // ignore: cast_nullable_to_non_nullable
                       as String,
+            category: freezed == category
+                ? _value.category
+                : category // ignore: cast_nullable_to_non_nullable
+                      as String?,
             notes: freezed == notes
                 ? _value.notes
                 : notes // ignore: cast_nullable_to_non_nullable
@@ -185,6 +192,7 @@ abstract class _$$ExpenseImplCopyWith<$Res> implements $ExpenseCopyWith<$Res> {
     String id,
     String groupId,
     String title,
+    String? category,
     String? notes,
     double amount,
     String currency,
@@ -217,6 +225,7 @@ class __$$ExpenseImplCopyWithImpl<$Res>
     Object? id = null,
     Object? groupId = null,
     Object? title = null,
+    Object? category = freezed,
     Object? notes = freezed,
     Object? amount = null,
     Object? currency = null,
@@ -244,6 +253,10 @@ class __$$ExpenseImplCopyWithImpl<$Res>
             ? _value.title
             : title // ignore: cast_nullable_to_non_nullable
                   as String,
+        category: freezed == category
+            ? _value.category
+            : category // ignore: cast_nullable_to_non_nullable
+                  as String?,
         notes: freezed == notes
             ? _value.notes
             : notes // ignore: cast_nullable_to_non_nullable
@@ -304,6 +317,7 @@ class _$ExpenseImpl implements _Expense {
     required this.id,
     required this.groupId,
     required this.title,
+    this.category,
     this.notes,
     required this.amount,
     required this.currency,
@@ -328,6 +342,8 @@ class _$ExpenseImpl implements _Expense {
   final String groupId;
   @override
   final String title;
+  @override
+  final String? category;
   @override
   final String? notes;
   @override
@@ -372,7 +388,7 @@ class _$ExpenseImpl implements _Expense {
 
   @override
   String toString() {
-    return 'Expense(id: $id, groupId: $groupId, title: $title, notes: $notes, amount: $amount, currency: $currency, convertedAmount: $convertedAmount, exchangeRate: $exchangeRate, date: $date, paidBy: $paidBy, payers: $payers, splits: $splits, createdBy: $createdBy, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Expense(id: $id, groupId: $groupId, title: $title, category: $category, notes: $notes, amount: $amount, currency: $currency, convertedAmount: $convertedAmount, exchangeRate: $exchangeRate, date: $date, paidBy: $paidBy, payers: $payers, splits: $splits, createdBy: $createdBy, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -383,6 +399,8 @@ class _$ExpenseImpl implements _Expense {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.groupId, groupId) || other.groupId == groupId) &&
             (identical(other.title, title) || other.title == title) &&
+            (identical(other.category, category) ||
+                other.category == category) &&
             (identical(other.notes, notes) || other.notes == notes) &&
             (identical(other.amount, amount) || other.amount == amount) &&
             (identical(other.currency, currency) ||
@@ -410,6 +428,7 @@ class _$ExpenseImpl implements _Expense {
     id,
     groupId,
     title,
+    category,
     notes,
     amount,
     currency,
@@ -443,6 +462,7 @@ abstract class _Expense implements Expense {
     required final String id,
     required final String groupId,
     required final String title,
+    final String? category,
     final String? notes,
     required final double amount,
     required final String currency,
@@ -465,6 +485,8 @@ abstract class _Expense implements Expense {
   String get groupId;
   @override
   String get title;
+  @override
+  String? get category;
   @override
   String? get notes;
   @override

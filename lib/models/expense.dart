@@ -12,6 +12,7 @@ class Expense with _$Expense {
     required String id,
     required String groupId,
     required String title,
+    String? category,
     String? notes,
     required double amount,
     required String currency,
@@ -32,10 +33,10 @@ class Expense with _$Expense {
     final data = doc.data() as Map<String, dynamic>;
 
     // Parse splits map
-    final splitsData = data['splits'] as Map<String, dynamic>? ?? {};
+    final splitsData = (data['splits'] as Map?)?.cast<String, dynamic>() ?? {};
     final splits = splitsData.map((key, value) => MapEntry(
       key,
-      ExpenseSplit.fromJson(value as Map<String, dynamic>),
+      ExpenseSplit.fromJson(Map<String, dynamic>.from(value as Map)),
     ));
 
     // Parse payers map, with fallback to legacy single paidBy field
@@ -43,7 +44,7 @@ class Expense with _$Expense {
     final paidBy = data['paidBy'] as String;
     Map<String, double> payers;
     if (data['payers'] != null) {
-      final payersData = data['payers'] as Map<String, dynamic>;
+      final payersData = (data['payers'] as Map).cast<String, dynamic>();
       payers = payersData.map((key, value) => MapEntry(key, (value as num).toDouble()));
     } else {
       // Backward compatibility: construct payers from legacy paidBy field
@@ -54,6 +55,7 @@ class Expense with _$Expense {
       id: doc.id,
       groupId: groupId,
       title: data['title'] as String,
+      category: data['category'] as String?,
       notes: data['notes'] as String?,
       amount: amount,
       currency: data['currency'] as String,

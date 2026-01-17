@@ -164,6 +164,7 @@ class FirestoreService {
   Future<String> createExpense({
     required String groupId,
     required String title,
+    String? category,
     String? notes,
     required double amount,
     required String currency,
@@ -187,6 +188,7 @@ class FirestoreService {
 
     await docRef.set({
       'title': title,
+      'category': category,
       'notes': notes,
       'amount': amount,
       'currency': currency,
@@ -213,6 +215,7 @@ class FirestoreService {
     required String groupId,
     required String expenseId,
     String? title,
+    String? category,
     String? notes,
     double? amount,
     String? currency,
@@ -227,6 +230,7 @@ class FirestoreService {
       'updatedAt': Timestamp.fromDate(DateTime.now()),
     };
     if (title != null) updates['title'] = title;
+    if (category != null) updates['category'] = category;
     if (notes != null) updates['notes'] = notes;
     if (amount != null) updates['amount'] = amount;
     if (currency != null) updates['currency'] = currency;

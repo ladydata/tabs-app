@@ -184,6 +184,14 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
                 },
               ),
               ListTile(
+                leading: const Icon(Icons.file_download_outlined),
+                title: const Text('Export Report'),
+                onTap: () {
+                  Navigator.pop(context);
+                  context.push('/groups/${widget.groupId}/export');
+                },
+              ),
+              ListTile(
                 leading: Icon(Icons.exit_to_app, color: AppColors.error),
                 title: Text('Leave Group', style: TextStyle(color: AppColors.error)),
                 onTap: () async {

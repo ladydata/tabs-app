@@ -284,7 +284,8 @@ class ExpenseDetailScreen extends ConsumerWidget {
   void _handleMenuAction(BuildContext context, WidgetRef ref, String action) async {
     switch (action) {
       case 'edit':
-        // TODO: Navigate to edit screen
+      case 'edit':
+        context.push('/groups/$groupId/expenses/$expenseId/edit');
         break;
       case 'delete':
         final confirm = await showDialog<bool>(

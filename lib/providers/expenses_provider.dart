@@ -32,6 +32,7 @@ class ExpensesNotifier extends StateNotifier<AsyncValue<void>> {
   Future<String?> createExpense({
     required String groupId,
     required String title,
+    String? category,
     String? notes,
     required double amount,
     required String currency,
@@ -77,6 +78,7 @@ class ExpensesNotifier extends StateNotifier<AsyncValue<void>> {
       final expenseId = await firestoreService.createExpense(
         groupId: groupId,
         title: title,
+        category: category,
         notes: notes,
         amount: amount,
         currency: currency,
@@ -117,6 +119,7 @@ class ExpensesNotifier extends StateNotifier<AsyncValue<void>> {
     required String groupId,
     required String expenseId,
     String? title,
+    String? category,
     String? notes,
     double? amount,
     String? currency,
@@ -181,6 +184,7 @@ class ExpensesNotifier extends StateNotifier<AsyncValue<void>> {
         groupId: groupId,
         expenseId: expenseId,
         title: title,
+        category: category,
         notes: notes,
         amount: amount,
         currency: currency,

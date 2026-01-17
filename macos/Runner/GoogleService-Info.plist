@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>715801902844-jgdudite93hnl8j13gnt5nn0ubj7dhi2.apps.googleusercontent.com</string>
+	<string>715801902844-2v53aov2f8ejc9f0qnvsd2p0vb7jtqr5.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.715801902844-jgdudite93hnl8j13gnt5nn0ubj7dhi2</string>
+	<string>com.googleusercontent.apps.715801902844-2v53aov2f8ejc9f0qnvsd2p0vb7jtqr5</string>
 	<key>API_KEY</key>
 	<string>AIzaSyDbt9WFfgS_5FBMbADTJrJCiwXlrAiQphg</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.kc.tabs</string>
+	<string>com.tabs.tabs</string>
 	<key>PROJECT_ID</key>
 	<string>tabs-app-32dc9</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:715801902844:ios:00f95a90a45a44717a6179</string>
+	<string>1:715801902844:ios:f740274a167f7af07a6179</string>
 </dict>
 </plist>

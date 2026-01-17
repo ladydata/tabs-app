@@ -11,6 +11,7 @@ import 'package:tabs/screens/expenses/add_expense_screen.dart';
 import 'package:tabs/screens/expenses/expense_detail_screen.dart';
 import 'package:tabs/screens/settlements/settle_up_screen.dart';
 import 'package:tabs/screens/activity/activity_screen.dart';
+import 'package:tabs/screens/export/export_screen.dart';
 
 class AppRoutes {
   static const signIn = '/sign-in';
@@ -23,6 +24,7 @@ class AppRoutes {
   static const expenseDetail = '/groups/:groupId/expenses/:expenseId';
   static const settleUp = '/groups/:groupId/settle';
   static const activity = '/groups/:groupId/activity';
+  static const export = '/groups/:groupId/export';
 }
 
 class AuthNotifierListenable extends ChangeNotifier {
@@ -94,6 +96,19 @@ final routerProvider = Provider<GoRouter>((ref) {
                 expenseId: expenseId,
               );
             },
+            routes: [
+              GoRoute(
+                path: 'edit',
+                builder: (context, state) {
+                  final groupId = state.pathParameters['groupId']!;
+                  final expenseId = state.pathParameters['expenseId']!;
+                  return AddExpenseScreen(
+                    groupId: groupId,
+                    expenseId: expenseId,
+                  );
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: 'settle',
@@ -107,6 +122,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) {
               final groupId = state.pathParameters['groupId']!;
               return ActivityScreen(groupId: groupId);
+            },
+          ),
+          GoRoute(
+            path: 'export',
+            builder: (context, state) {
+              final groupId = state.pathParameters['groupId']!;
+              return ExportScreen(groupId: groupId);
             },
           ),
         ],

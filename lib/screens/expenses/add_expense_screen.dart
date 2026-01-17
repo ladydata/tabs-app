@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:tabs/config/categories.dart';
 import 'package:tabs/config/theme.dart';
 import 'package:tabs/models/models.dart';
 import 'package:tabs/providers/auth_provider.dart';
@@ -11,6 +12,8 @@ import 'package:tabs/providers/expenses_provider.dart';
 import 'package:tabs/services/exchange_rate_service.dart';
 import 'package:tabs/widgets/common/loading_widget.dart';
 import 'package:tabs/widgets/common/currency_selector.dart';
+import 'package:tabs/widgets/expense/payer_selector_modal.dart';
+import 'package:tabs/widgets/expense/split_selector_modal.dart';
 
 class AddExpenseScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -33,6 +36,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   final _notesController = TextEditingController();
 
   String _selectedCurrency = 'USD';
+  String? _selectedCategory;
   DateTime _selectedDate = DateTime.now();
   Map<String, bool> _selectedPayers = {};
   Map<String, TextEditingController> _payerAmountControllers = {};
@@ -43,6 +47,19 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   bool _isLoading = false;
   double? _exchangeRate;
   double? _convertedAmount;
+
+  bool _isDataLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.expenseId != null) {
+      // Defer loading until after build to access ref
+      Future.microtask(() => _loadExpenseData());
+    } else {
+      _isDataLoaded = true;
+    }
+  }
 
   @override
   void dispose() {
@@ -73,6 +90,9 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
           if (group == null) {
             return const Center(child: Text('Group not found'));
           }
+          if (!_isDataLoaded) {
+             return const LoadingWidget();
+          }
           return _buildForm(context, group);
         },
       ),
@@ -80,23 +100,46 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   }
 
   Widget _buildForm(BuildContext context, ExpenseGroup group) {
-    // Initialize state based on group
     if (_selectedPayers.isEmpty) {
       final currentUser = ref.read(currentUserProvider);
       _selectedCurrency = group.currency;
 
       // Initialize payers (default to current user)
-      for (final memberId in group.memberIds) {
-        _selectedPayers[memberId] = memberId == currentUser?.uid;
-        _payerAmountControllers[memberId] = TextEditingController();
+      if (widget.expenseId == null) {
+        for (final memberId in group.memberIds) {
+          _selectedPayers[memberId] = memberId == currentUser?.uid;
+          _payerAmountControllers[memberId] = TextEditingController();
+        }
+      } else {
+        for (final memberId in group.memberIds) {
+           if (!_payerAmountControllers.containsKey(memberId)) {
+             _payerAmountControllers[memberId] = TextEditingController();
+           }
+        }
       }
 
       // Initialize selected members for splits
-      for (final memberId in group.memberIds) {
-        _selectedMembers[memberId] = true;
-        _splitControllers[memberId] = TextEditingController();
+      if (widget.expenseId == null) {
+        for (final memberId in group.memberIds) {
+          _selectedMembers[memberId] = true;
+          _splitControllers[memberId] = TextEditingController();
+        }
+      } else {
+        for (final memberId in group.memberIds) {
+           if (!_splitControllers.containsKey(memberId)) {
+             _splitControllers[memberId] = TextEditingController();
+           }
+        }
       }
     }
+
+    final payerCount = _selectedPayers.values.where((v) => v).length;
+    final primaryPayerId = _selectedPayers.entries
+        .firstWhere((e) => e.value, orElse: () => _selectedPayers.entries.first)
+        .key;
+    final primaryPayerName = payerCount > 1 
+        ? '$payerCount people' 
+        : (group.members[primaryPayerId]?.displayName ?? 'Unknown');
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -105,108 +148,56 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Amount and Currency
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: TextFormField(
-                    controller: _amountController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-                    ],
-                    decoration: InputDecoration(
-                      labelText: 'Amount',
-                      prefixText: '${ExchangeRateService.getCurrencySymbol(_selectedCurrency)} ',
-                    ),
-                    style: Theme.of(context).textTheme.headlineMedium,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter an amount';
-                      }
-                      final amount = double.tryParse(value);
-                      if (amount == null || amount <= 0) {
-                        return 'Please enter a valid amount';
-                      }
-                      return null;
-                    },
-                    onChanged: (_) => _updateConversion(group),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Currency'),
-                      const SizedBox(height: 8),
-                      InkWell(
-                        onTap: () => _selectCurrency(group),
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.textDisabled),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                _selectedCurrency,
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              const Icon(Icons.arrow_drop_down),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            // Show conversion if different currency
-            if (_selectedCurrency != group.currency && _convertedAmount != null) ...[
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryLight.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
+            // Category Selector (Top Center)
+            Center(
+              child: GestureDetector(
+                onTap: () => _showCategorySelector(context),
+                child: Column(
                   children: [
-                    const Icon(Icons.currency_exchange, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      '= ${ExchangeRateService.formatAmount(_convertedAmount!, group.currency)}',
-                      style: Theme.of(context).textTheme.titleMedium,
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: _selectedCategory != null 
+                            ? Categories.getById(_selectedCategory).color.withOpacity(0.1)
+                            : AppColors.background,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.textDisabled),
+                      ),
+                      child: Icon(
+                        _selectedCategory != null 
+                            ? Categories.getById(_selectedCategory).icon 
+                            : Icons.category_outlined,
+                        size: 32,
+                        color: _selectedCategory != null 
+                            ? Categories.getById(_selectedCategory).color 
+                            : AppColors.textSecondary,
+                      ),
                     ),
-                    const Spacer(),
+                    const SizedBox(height: 8),
                     Text(
-                      'Rate: ${_exchangeRate?.toStringAsFixed(4)}',
+                      _selectedCategory != null 
+                          ? Categories.getById(_selectedCategory).name 
+                          : 'Select Category',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
               ),
-            ],
-
+            ),
+            
             const SizedBox(height: 24),
 
-            // Title
+            // Title Input
             TextFormField(
               controller: _titleController,
+              textAlign: TextAlign.center,
               textCapitalization: TextCapitalization.sentences,
               decoration: const InputDecoration(
-                labelText: 'Description',
-                hintText: 'What was this expense for?',
-                prefixIcon: Icon(Icons.description_outlined),
+                hintText: 'What is this for?',
+                border: InputBorder.none,
+                hintStyle: TextStyle(fontSize: 18),
               ),
+              style: const TextStyle(fontSize: 18),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'Please enter a description';
@@ -217,174 +208,234 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
 
             const SizedBox(height: 16),
 
-            // Date
-            InkWell(
-              onTap: () => _selectDate(group),
-              borderRadius: BorderRadius.circular(12),
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Date',
-                  prefixIcon: Icon(Icons.calendar_today_outlined),
-                ),
-                child: Text(
-                  DateFormat('EEEE, MMMM d, yyyy').format(_selectedDate),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Notes
-            TextFormField(
-              controller: _notesController,
-              textCapitalization: TextCapitalization.sentences,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Notes (optional)',
-                hintText: 'Add any additional details...',
-                prefixIcon: Icon(Icons.notes_outlined),
-                alignLabelWithHint: true,
-              ),
-            ),
-
-            const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 24),
-
-            // Paid by
+            // Amount Input (Large)
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
               children: [
-                Text(
-                  'Paid by',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const Spacer(),
-                if (_selectedPayerCount > 1)
-                  TextButton.icon(
-                    onPressed: () => _splitPayersEvenly(group),
-                    icon: const Icon(Icons.drag_handle, size: 18),
-                    label: const Text('Split evenly'),
+                InkWell(
+                  onTap: () => _selectCurrency(group),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          ExchangeRateService.getCurrencySymbol(_selectedCurrency),
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.arrow_drop_down, size: 24),
+                      ],
+                    ),
                   ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: group.members.entries.map((entry) {
-                final isSelected = _selectedPayers[entry.key] ?? false;
-                return FilterChip(
-                  label: Text(entry.value.displayName),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    setState(() {
-                      _selectedPayers[entry.key] = selected;
-                      if (!selected) {
-                        _payerAmountControllers[entry.key]?.clear();
-                      } else if (_selectedPayerCount == 1) {
-                        // Auto-fill amount for single payer
-                        _payerAmountControllers[entry.key]?.text = _amountController.text;
+                ),
+                IntrinsicWidth(
+                  child: TextFormField(
+                    controller: _amountController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                    ],
+                    textAlign: TextAlign.center,
+                    decoration: const InputDecoration(
+                      hintText: '0.00',
+                      border: InputBorder.none,
+                    ),
+                    style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+                    validator: (value) {
+                      if (value == null || value.isEmpty || (double.tryParse(value) ?? 0) <= 0) {
+                        return 'Invalid amount';
                       }
-                    });
-                  },
-                  selectedColor: AppColors.primary,
-                  labelStyle: TextStyle(
-                    color: isSelected ? Colors.white : AppColors.textPrimary,
+                      return null;
+                    },
+                    onChanged: (_) => _updateConversion(group),
                   ),
-                );
-              }).toList(),
-            ),
-
-            // Payer amounts (shown when multiple payers or single payer selected)
-            if (_selectedPayerCount > 0) ...[
-              const SizedBox(height: 16),
-              ...group.members.entries
-                  .where((e) => _selectedPayers[e.key] ?? false)
-                  .map((entry) => _buildPayerAmountInput(entry.key, entry.value.displayName, group)),
-              if (_selectedPayerCount > 1) ...[
-                const SizedBox(height: 8),
-                _buildPayerTotalValidation(group),
-              ],
-            ],
-
-            const SizedBox(height: 24),
-
-            // Split type
-            Text(
-              'Split',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
-            SegmentedButton<SplitType>(
-              segments: const [
-                ButtonSegment(
-                  value: SplitType.equal,
-                  label: Text('Equally'),
-                  icon: Icon(Icons.drag_handle),
-                ),
-                ButtonSegment(
-                  value: SplitType.percentage,
-                  label: Text('By %'),
-                  icon: Icon(Icons.percent),
-                ),
-                ButtonSegment(
-                  value: SplitType.exact,
-                  label: Text('Exact'),
-                  icon: Icon(Icons.attach_money),
                 ),
               ],
-              selected: {_splitType},
-              onSelectionChanged: (selection) {
-                setState(() => _splitType = selection.first);
-              },
             ),
-
-            const SizedBox(height: 16),
-
-            // Split among
-            Text(
-              'Split among',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            ...group.members.entries.map((entry) {
-              final isSelected = _selectedMembers[entry.key] ?? false;
-              return CheckboxListTile(
-                value: isSelected,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedMembers[entry.key] = value ?? false;
-                  });
-                },
-                title: Text(entry.value.displayName),
-                subtitle: _splitType != SplitType.equal
-                    ? _buildSplitInput(entry.key, group)
-                    : null,
-                controlAffinity: ListTileControlAffinity.leading,
-                contentPadding: EdgeInsets.zero,
-              );
-            }),
 
             const SizedBox(height: 32),
 
-            // Submit button
-            ElevatedButton(
-              onPressed: _isLoading ? null : () => _saveExpense(group),
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
+            // Sentence-style Interaction
+            Center(
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  const Text('Paid by '),
+                  InkWell(
+                    onTap: () => _showPayerSelector(context, group),
+                    borderRadius: BorderRadius.circular(4),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      child: Text(
+                        primaryPayerName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
                       ),
-                    )
-                  : Text(widget.expenseId != null ? 'Save Changes' : 'Add Expense'),
+                    ),
+                  ),
+                  const Text(' and split '),
+                  InkWell(
+                    onTap: () => _showSplitSelector(context, group),
+                    borderRadius: BorderRadius.circular(4),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      child: Text(
+                        _splitType == SplitType.equal ? 'equally' : 'unequally',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Text('.'),
+                ],
+              ),
             ),
+
+            const SizedBox(height: 32),
+
+            // Date & Notes
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () => _selectDate(group),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.textDisabled),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.calendar_today, size: 20),
+                          const SizedBox(width: 8),
+                          Text(DateFormat('MMM d, yyyy').format(_selectedDate)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: GestureDetector(
+                     onTap: () {
+                         // Focus notes field or show modal
+                     },
+                     child: TextFormField(
+                      controller: _notesController,
+                      decoration: const InputDecoration(
+                        labelText: 'Notes',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                        prefixIcon: Icon(Icons.notes),
+                        isDense: true,
+                      ),
+                     ),
+                  )
+                ),
+              ],
+            ),
+
+             const SizedBox(height: 32),
+             
+             ElevatedButton(
+                onPressed: _isLoading ? null : () => _saveExpense(group),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('Save Expense'),
+             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showCategorySelector(BuildContext context) {
+     // Reuse existing dropdown items but in a better modal or simple dialog
+     showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) {
+        return ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(24),
+          children: [
+             Text('Select Category', style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
+             const SizedBox(height: 16),
+             ...Categories.defaults.map((c) => ListTile(
+               leading: Icon(c.icon, color: c.color),
+               title: Text(c.name),
+               onTap: () {
+                 setState(() => _selectedCategory = c.id);
+                 Navigator.pop(context);
+               },
+             )),
+          ],
+        );
+      }
+     );
+  }
+
+  void _showPayerSelector(BuildContext context, ExpenseGroup group) {
+    // Only support single payer UI-selection for simplicity in "Paid by X" text, 
+    // but underlying logic supports multi-payer if we wanted to build a complex modal.
+    // For now, let's assume single payer selection or "Multiple" handled elsewhere.
+    
+    // We'll reset to single payer if they select someone here.
+    final currentPayer = _selectedPayers.entries.firstWhere((e) => e.value, orElse: () => _selectedPayers.entries.first).key;
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => PayerSelectorModal(
+        group: group,
+        selectedPayerId: currentPayer,
+        onPayerSelected: (payerId) {
+          setState(() {
+            _selectedPayers.clear();
+            _selectedPayers[payerId] = true;
+            // Also update amount controller for this payer? 
+            // The robust way is to just clear others.
+            // _payerAmountControllers logic happens in _saveExpense based on ratio.
+          });
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+
+  void _showSplitSelector(BuildContext context, ExpenseGroup group) {
+     showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => SplitSelectorModal(
+        group: group,
+        amount: double.tryParse(_amountController.text) ?? 0,
+        currency: _selectedCurrency,
+        selectedMembers: _selectedMembers,
+        splitControllers: _splitControllers,
+        initialSplitType: _splitType,
+        onSplitChanged: (type, selectedMembers) {
+          setState(() {
+             _splitType = type;
+             _selectedMembers = selectedMembers;
+          });
+        },
       ),
     );
   }
@@ -641,19 +692,27 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
       final payers = <String, double>{};
       double payerTotal = 0;
 
-      for (final payerId in selectedPayerIds) {
-        final payerAmountText = _payerAmountControllers[payerId]?.text ?? '';
-        final payerAmount = double.tryParse(payerAmountText) ?? 0;
-        if (payerAmount <= 0) {
-          throw Exception('Each payer must have an amount greater than 0');
+      if (selectedPayerIds.length == 1) {
+        // Single payer: automatically assign full amount
+        final payerId = selectedPayerIds.first;
+        payers[payerId] = amount;
+        payerTotal = amount;
+      } else {
+        // Multiple payers: read from controllers
+        for (final payerId in selectedPayerIds) {
+          final payerAmountText = _payerAmountControllers[payerId]?.text ?? '';
+          final payerAmount = double.tryParse(payerAmountText) ?? 0;
+          if (payerAmount <= 0) {
+            throw Exception('Each payer must have an amount greater than 0');
+          }
+          payers[payerId] = payerAmount;
+          payerTotal += payerAmount;
         }
-        payers[payerId] = payerAmount;
-        payerTotal += payerAmount;
-      }
 
-      // Validate payer amounts equal expense amount
-      if ((payerTotal - amount).abs() > 0.01) {
-        throw Exception('Payer amounts must equal the expense total');
+        // Validate payer amounts equal expense amount
+        if ((payerTotal - amount).abs() > 0.01) {
+          throw Exception('Payer amounts must equal the expense total');
+        }
       }
 
       // Build splits based on split type
@@ -705,18 +764,36 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
           break;
       }
 
-      await ref.read(expensesNotifierProvider.notifier).createExpense(
-            groupId: widget.groupId,
-            title: _titleController.text.trim(),
-            notes: _notesController.text.trim().isEmpty
-                ? null
-                : _notesController.text.trim(),
-            amount: amount,
-            currency: _selectedCurrency,
-            date: _selectedDate,
-            payers: payers,
-            splits: splits,
-          );
+      if (widget.expenseId != null) {
+        await ref.read(expensesNotifierProvider.notifier).updateExpense(
+              groupId: widget.groupId,
+              expenseId: widget.expenseId!,
+              title: _titleController.text.trim(),
+              category: _selectedCategory,
+              notes: _notesController.text.trim().isEmpty
+                  ? null
+                  : _notesController.text.trim(),
+              amount: amount,
+              currency: _selectedCurrency,
+              date: _selectedDate,
+              payers: payers,
+              splits: splits,
+            );
+      } else {
+        await ref.read(expensesNotifierProvider.notifier).createExpense(
+              groupId: widget.groupId,
+              title: _titleController.text.trim(),
+              category: _selectedCategory,
+              notes: _notesController.text.trim().isEmpty
+                  ? null
+                  : _notesController.text.trim(),
+              amount: amount,
+              currency: _selectedCurrency,
+              date: _selectedDate,
+              payers: payers,
+              splits: splits,
+            );
+      }
 
       if (mounted) {
         context.pop();
@@ -730,6 +807,71 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
       );
     } finally {
       if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _loadExpenseData() async {
+    try {
+      setState(() => _isLoading = true);
+      
+      final expense = await ref.read(
+        expenseProvider((groupId: widget.groupId, expenseId: widget.expenseId!)).future,
+      );
+
+      if (expense == null) throw Exception('Expense not found');
+
+      if (!mounted) return;
+
+      setState(() {
+        _titleController.text = expense.title;
+        _amountController.text = expense.amount.toString(); // Use original amount
+        _notesController.text = expense.notes ?? '';
+        _selectedCategory = expense.category;
+        _selectedCurrency = expense.currency;
+        _selectedDate = expense.date;
+        _exchangeRate = expense.exchangeRate;
+        _convertedAmount = expense.convertedAmount;
+        
+        // Load Payers
+        _selectedPayers.clear();
+        _payerAmountControllers.clear();
+        for (final entry in expense.payers.entries) {
+          _selectedPayers[entry.key] = true;
+          final controller = TextEditingController(text: entry.value.toStringAsFixed(2));
+          _payerAmountControllers[entry.key] = controller;
+        }
+
+        // Load Splits
+        _selectedMembers.clear();
+        _splitControllers.clear();
+        
+        // Determine split type from the first split (assuming uniform type)
+        if (expense.splits.isNotEmpty) {
+          _splitType = expense.splits.values.first.type;
+        }
+
+        for (final entry in expense.splits.entries) {
+          _selectedMembers[entry.key] = true;
+          String text = '';
+          if (_splitType == SplitType.percentage) {
+             text = entry.value.percentage?.toString() ?? '';
+          } else if (_splitType == SplitType.exact) {
+             text = entry.value.amount.toString();
+          }
+          final controller = TextEditingController(text: text);
+          _splitControllers[entry.key] = controller;
+        }
+        
+        _isDataLoaded = true;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading expense: $e')),
+        );
         setState(() => _isLoading = false);
       }
     }

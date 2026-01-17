@@ -4,10 +4,17 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class ExchangeRateService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore;
+  final http.Client _client;
+
+  ExchangeRateService({
+    FirebaseFirestore? firestore,
+    http.Client? client,
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _client = client ?? http.Client();
 
   // TODO: Replace with your API key from https://www.exchangerate-api.com/
-  static const String _apiKey = 'YOUR_API_KEY';
+  static const String _apiKey = '3c5b7f718a0d7a1b78c7bbad';
   static const String _baseUrl = 'https://v6.exchangerate-api.com/v6';
 
   // Common currencies for quick selection
@@ -175,7 +182,7 @@ class ExchangeRateService {
         url = '$_baseUrl/$_apiKey/latest/$baseCurrency';
       }
 
-      final response = await http.get(Uri.parse(url));
+      final response = await _client.get(Uri.parse(url));
 
       if (response.statusCode != 200) {
         return null;
