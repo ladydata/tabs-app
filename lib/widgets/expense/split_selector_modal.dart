@@ -32,20 +32,95 @@ class _SplitSelectorModalState extends State<SplitSelectorModal>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late SplitType _currentSplitType;
-  late Map<String, bool> _localSelectedMembers;
+  
+  // Independent selection state for each tab
+  late Map<String, bool> _equalSelected;
+  late Map<String, bool> _exactSelected;
+  late Map<String, bool> _percentSelected;
+  
+  // Separate controllers
+  late Map<String, TextEditingController> _exactControllers;
+  late Map<String, TextEditingController> _percentControllers;
+
+  // Explicitly map SplitType to Tab Index to avoid mismatch with Enum order
+  int _getTabIndex(SplitType type) {
+    switch (type) {
+      case SplitType.equal: return 0;
+      case SplitType.exact: return 1;
+      case SplitType.percentage: return 2;
+    }
+  }
+
+  SplitType _getSplitTypeAndIndex(int index) {
+    switch (index) {
+      case 0: return SplitType.equal;
+      case 1: return SplitType.exact;
+      case 2: return SplitType.percentage;
+      default: return SplitType.equal;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _currentSplitType = widget.initialSplitType;
-    _localSelectedMembers = Map.from(widget.selectedMembers);
+    
+    // Initialize independent selections based on current active type 
+    // ... (rest of initialization) ...
+    // ...
+    // 1. Equal Selection
+    if (widget.initialSplitType == SplitType.equal) {
+       _equalSelected = Map.from(widget.selectedMembers);
+    } else {
+       // Default equal to unchecked as requested
+       _equalSelected = {for (var id in widget.group.memberIds) id: false};
+    }
+
+    // 2. Exact Selection
+    if (widget.initialSplitType == SplitType.exact) {
+       _exactSelected = Map.from(widget.selectedMembers);
+    } else {
+       // For exact, start with nobody selected unless they have a value entered
+       _exactSelected = {for (var id in widget.group.memberIds) id: false};
+    }
+
+    // 3. Percent Selection
+    if (widget.initialSplitType == SplitType.percentage) {
+      _percentSelected = Map.from(widget.selectedMembers);
+    } else {
+      _percentSelected = {for (var id in widget.group.memberIds) id: false};
+    }
+    
+    // Initialize local controllers
+    _exactControllers = {};
+    _percentControllers = {};
+    
+    for (final memberId in widget.group.memberIds) {
+      _exactControllers[memberId] = TextEditingController();
+      _percentControllers[memberId] = TextEditingController();
+      
+      // Load existing values into controllers and auto-select if value exists
+      if (widget.initialSplitType == SplitType.exact) {
+        final text = widget.splitControllers[memberId]?.text ?? '';
+        _exactControllers[memberId]?.text = text;
+        if (text.isNotEmpty && (double.tryParse(text) ?? 0) > 0) {
+           _exactSelected[memberId] = true;
+        }
+      } else if (widget.initialSplitType == SplitType.percentage) {
+        final text = widget.splitControllers[memberId]?.text ?? '';
+        _percentControllers[memberId]?.text = text;
+        if (text.isNotEmpty && (double.tryParse(text) ?? 0) > 0) {
+           _percentSelected[memberId] = true;
+        }
+      }
+    }
     
     _tabController = TabController(length: 3, vsync: this);
-    _tabController.index = _currentSplitType.index;
+    _tabController.index = _getTabIndex(_currentSplitType);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         setState(() {
-          _currentSplitType = SplitType.values[_tabController.index];
+          _currentSplitType = _getSplitTypeAndIndex(_tabController.index);
         });
       }
     });
@@ -54,11 +129,51 @@ class _SplitSelectorModalState extends State<SplitSelectorModal>
   @override
   void dispose() {
     _tabController.dispose();
+    for (final controller in _exactControllers.values) controller.dispose();
+    for (final controller in _percentControllers.values) controller.dispose();
     super.dispose();
   }
 
   void _submit() {
-    widget.onSplitChanged(_currentSplitType, _localSelectedMembers);
+    // Commit values to parent controllers based on selected type
+    for (final memberId in widget.group.memberIds) {
+      final parentController = widget.splitControllers[memberId];
+      if (parentController == null) continue;
+
+      if (_currentSplitType == SplitType.exact) {
+        parentController.text = _exactControllers[memberId]?.text ?? '';
+      } else if (_currentSplitType == SplitType.percentage) {
+        parentController.text = _percentControllers[memberId]?.text ?? '';
+      } else {
+        parentController.clear();
+      }
+    }
+
+    // Return the selection map corresponding to the active tab
+    Map<String, bool> finalSelectedMembers;
+    switch (_currentSplitType) {
+      case SplitType.equal:
+        finalSelectedMembers = _equalSelected;
+        break;
+      case SplitType.exact:
+        // Re-calculate selection based on values > 0
+        finalSelectedMembers = {};
+        for (final memberId in widget.group.memberIds) {
+          final val = double.tryParse(_exactControllers[memberId]?.text ?? '') ?? 0;
+          finalSelectedMembers[memberId] = val > 0;
+        }
+        break;
+      case SplitType.percentage:
+        // Re-calculate selection based on values > 0
+        finalSelectedMembers = {};
+        for (final memberId in widget.group.memberIds) {
+          final val = double.tryParse(_percentControllers[memberId]?.text ?? '') ?? 0;
+          finalSelectedMembers[memberId] = val > 0;
+        }
+        break;
+    }
+
+    widget.onSplitChanged(_currentSplitType, finalSelectedMembers);
     Navigator.pop(context);
   }
 
@@ -122,18 +237,18 @@ class _SplitSelectorModalState extends State<SplitSelectorModal>
   }
 
   Widget _buildEqualSplitTab() {
-    final selectedCount = _localSelectedMembers.values.where((v) => v).length;
+    final selectedCount = _equalSelected.values.where((v) => v).length;
     final amountPerPerson = selectedCount > 0 ? widget.amount / selectedCount : 0;
 
     return ListView(
       padding: const EdgeInsets.all(24),
       children: widget.group.members.entries.map((entry) {
-        final isSelected = _localSelectedMembers[entry.key] ?? false;
+        final isSelected = _equalSelected[entry.key] ?? false;
         return CheckboxListTile(
           value: isSelected,
           onChanged: (value) {
             setState(() {
-              _localSelectedMembers[entry.key] = value ?? false;
+              _equalSelected[entry.key] = value ?? false;
             });
           },
           title: Text(entry.value.displayName),
@@ -156,8 +271,8 @@ class _SplitSelectorModalState extends State<SplitSelectorModal>
     return ListView(
       padding: const EdgeInsets.all(24),
       children: widget.group.members.entries.map((entry) {
-        final controller = widget.splitControllers[entry.key];
-        // Ensure controller exists (it should from parent)
+        final controller = _exactControllers[entry.key];
+        
         if (controller == null) return const SizedBox.shrink();
 
         return Padding(
@@ -186,10 +301,8 @@ class _SplitSelectorModalState extends State<SplitSelectorModal>
                     hintText: '0.00',
                   ),
                   onChanged: (val) {
-                    // Auto-select if amount > 0
-                    if ((double.tryParse(val) ?? 0) > 0) {
-                      _localSelectedMembers[entry.key] = true;
-                    }
+                    // Auto-select is implicit on submission
+                    setState(() {}); // Rebuild to update UI if needed
                   },
                 ),
               ),
@@ -204,7 +317,8 @@ class _SplitSelectorModalState extends State<SplitSelectorModal>
      return ListView(
       padding: const EdgeInsets.all(24),
       children: widget.group.members.entries.map((entry) {
-         final controller = widget.splitControllers[entry.key];
+         final controller = _percentControllers[entry.key];
+         
         if (controller == null) return const SizedBox.shrink();
 
         return Padding(
@@ -233,9 +347,7 @@ class _SplitSelectorModalState extends State<SplitSelectorModal>
                     hintText: '0',
                   ),
                    onChanged: (val) {
-                    if ((double.tryParse(val) ?? 0) > 0) {
-                      _localSelectedMembers[entry.key] = true;
-                    }
+                    setState(() {}); // Rebuild
                   },
                 ),
               ),
