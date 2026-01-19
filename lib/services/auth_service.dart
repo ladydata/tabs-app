@@ -141,6 +141,10 @@ class AuthService {
 
   // Sign out
   Future<void> signOut() async {
+    // Disconnect ensures the user can choose a different account next time
+    if (await _googleSignIn.isSignedIn()) {
+      await _googleSignIn.disconnect();
+    }
     await _googleSignIn.signOut();
     await _auth.signOut();
   }

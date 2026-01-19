@@ -14,6 +14,7 @@ import 'package:tabs/widgets/common/loading_widget.dart';
 import 'package:tabs/widgets/common/currency_selector.dart';
 import 'package:tabs/widgets/expense/payer_selector_modal.dart';
 import 'package:tabs/widgets/expense/split_selector_modal.dart';
+import 'package:tabs/l10n/app_localizations.dart';
 
 class AddExpenseScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -81,14 +82,16 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.expenseId != null ? 'Edit Expense' : 'Add Expense'),
+        title: Text(widget.expenseId != null 
+            ? AppLocalizations.of(context)!.editExpense 
+            : AppLocalizations.of(context)!.addExpense),
       ),
       body: groupAsync.when(
         loading: () => const LoadingWidget(),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text('${AppLocalizations.of(context)!.errorGeneric}: $error')),
         data: (group) {
           if (group == null) {
-            return const Center(child: Text('Group not found'));
+            return Center(child: Text(AppLocalizations.of(context)!.errorGeneric));
           }
           if (!_isDataLoaded) {
              return const LoadingWidget();
@@ -138,7 +141,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
         .firstWhere((e) => e.value, orElse: () => _selectedPayers.entries.first)
         .key;
     final primaryPayerName = payerCount > 1 
-        ? '$payerCount people' 
+        ? '$payerCount ${AppLocalizations.of(context)!.paidBy}' // Slightly awkward but close enough for now
         : (group.members[primaryPayerId]?.displayName ?? 'Unknown');
 
     return SingleChildScrollView(
@@ -177,7 +180,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                     Text(
                       _selectedCategory != null 
                           ? Categories.getById(_selectedCategory).name 
-                          : 'Select Category',
+                          : AppLocalizations.of(context)!.selectCategory,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -192,15 +195,15 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
               controller: _titleController,
               textAlign: TextAlign.center,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                hintText: 'What is this for?',
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.description,
                 border: InputBorder.none,
-                hintStyle: TextStyle(fontSize: 18),
+                hintStyle: const TextStyle(fontSize: 18),
               ),
               style: const TextStyle(fontSize: 18),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a description';
+                  return AppLocalizations.of(context)!.errorRequired;
                 }
                 return null;
               },
@@ -247,7 +250,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                     style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
                     validator: (value) {
                       if (value == null || value.isEmpty || (double.tryParse(value) ?? 0) <= 0) {
-                        return 'Invalid amount';
+                        return AppLocalizations.of(context)!.invalidAmount;
                       }
                       return null;
                     },
@@ -265,7 +268,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                 alignment: WrapAlignment.center,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  const Text('Paid by '),
+                  Text('${AppLocalizations.of(context)!.paidBy} '),
                   InkWell(
                     onTap: () => _showPayerSelector(context, group),
                     borderRadius: BorderRadius.circular(4),
@@ -280,14 +283,16 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                       ),
                     ),
                   ),
-                  const Text(' and split '),
+                  Text(' ${AppLocalizations.of(context)!.split} '),
                   InkWell(
                     onTap: () => _showSplitSelector(context, group),
                     borderRadius: BorderRadius.circular(4),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                       child: Text(
-                        _splitType == SplitType.equal ? 'equally' : 'unequally',
+                        _splitType == SplitType.equal 
+                          ? AppLocalizations.of(context)!.equally.toLowerCase() 
+                          : AppLocalizations.of(context)!.unequally,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
@@ -333,10 +338,10 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                      },
                      child: TextFormField(
                       controller: _notesController,
-                      decoration: const InputDecoration(
-                        labelText: 'Notes',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                        prefixIcon: Icon(Icons.notes),
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.notes,
+                        border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                        prefixIcon: const Icon(Icons.notes),
                         isDense: true,
                       ),
                      ),
@@ -355,7 +360,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Save Expense'),
+                    : Text(AppLocalizations.of(context)!.save),
              ),
           ],
         ),
@@ -373,7 +378,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
           shrinkWrap: true,
           padding: const EdgeInsets.all(24),
           children: [
-             Text('Select Category', style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
+             Text(AppLocalizations.of(context)!.selectCategory, style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
              const SizedBox(height: 16),
              ...Categories.defaults.map((c) => ListTile(
                leading: Icon(c.icon, color: c.color),
@@ -666,7 +671,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
 
     if (selectedPayerIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one payer')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.errorRequired)),
       );
       return;
     }
@@ -678,7 +683,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
 
     if (selectedMemberIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one person to split with')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.errorRequired)),
       );
       return;
     }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tabs/config/routes.dart';
 import 'package:tabs/config/theme.dart';
 import 'package:tabs/providers/auth_provider.dart';
+import 'package:tabs/l10n/app_localizations.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
@@ -99,7 +100,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Tabs',
+                    AppLocalizations.of(context)!.appTitle,
                     style: Theme.of(context).textTheme.displayMedium?.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
@@ -108,7 +109,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Split expenses with ease',
+                    AppLocalizations.of(context)!.splitExpensesWithEase,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -125,7 +126,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       width: 24,
                       errorBuilder: (_, __, ___) => const Icon(Icons.g_mobiledata),
                     ),
-                    label: const Text('Continue with Google'),
+                    label: Text(AppLocalizations.of(context)!.continueWithGoogle),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
@@ -139,7 +140,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
-                          'or',
+                          AppLocalizations.of(context)!.or,
                           style: TextStyle(color: AppColors.textSecondary),
                         ),
                       ),
@@ -156,16 +157,16 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         TextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            prefixIcon: Icon(Icons.email_outlined),
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context)!.email,
+                            prefixIcon: const Icon(Icons.email_outlined),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
+                              return AppLocalizations.of(context)!.enterEmail;
                             }
                             if (!value.contains('@')) {
-                              return 'Please enter a valid email';
+                              return AppLocalizations.of(context)!.validEmail;
                             }
                             return null;
                           },
@@ -175,7 +176,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           controller: _passwordController,
                           obscureText: _obscurePassword,
                           decoration: InputDecoration(
-                            labelText: 'Password',
+                            labelText: AppLocalizations.of(context)!.password,
                             prefixIcon: const Icon(Icons.lock_outlined),
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -192,10 +193,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
+                              return AppLocalizations.of(context)!.enterPassword;
                             }
                             if (value.length < 6) {
-                              return 'Password must be at least 6 characters';
+                              return AppLocalizations.of(context)!.passwordLength;
                             }
                             return null;
                           },
@@ -207,7 +208,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                             onPressed: () {
                               // TODO: Implement forgot password
                             },
-                            child: const Text('Forgot password?'),
+                            child: Text(AppLocalizations.of(context)!.forgotPassword),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -224,7 +225,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                       color: Colors.white,
                                     ),
                                   )
-                                : const Text('Sign In'),
+                                : Text(AppLocalizations.of(context)!.signIn),
                           ),
                         ),
                       ],
@@ -237,16 +238,17 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Don't have an account?",
+                        AppLocalizations.of(context)!.dontHaveAccount,
                         style: TextStyle(color: AppColors.textSecondary),
                       ),
                       TextButton(
                         onPressed: () => context.go(AppRoutes.signUp),
-                        child: const Text('Sign Up'),
+                        child: Text(AppLocalizations.of(context)!.signUp),
                       ),
                     ],
                   ),
                 ],
+
               ),
             ),
           ),

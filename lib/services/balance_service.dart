@@ -38,6 +38,17 @@ class BalanceService {
     return balances;
   }
 
+  /// Check if a group is fully settled (everyone's balance is ~0)
+  bool isGroupSettled(List<Expense> expenses, List<Settlement> settlements) {
+    final balances = calculateBalances(expenses: expenses, settlements: settlements);
+    for (final balance in balances.values) {
+      if (balance.abs() > 0.01) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /// Calculate pairwise debts between members
   /// Returns a list of debts showing who owes whom and how much
   List<Debt> calculateDebts({

@@ -155,6 +155,15 @@ class FirestoreService {
             snapshot.docs.map((doc) => Expense.fromFirestore(doc, groupId)).toList());
   }
 
+  Future<List<Expense>> getGroupExpensesOnce(String groupId) async {
+    final snapshot = await _expensesCollection(groupId)
+        .orderBy('date', descending: true)
+        .get();
+    return snapshot.docs
+        .map((doc) => Expense.fromFirestore(doc, groupId))
+        .toList();
+  }
+
   Future<Expense?> getExpense(String groupId, String expenseId) async {
     final doc = await _expensesCollection(groupId).doc(expenseId).get();
     if (!doc.exists) return null;
@@ -269,6 +278,15 @@ class FirestoreService {
         .snapshots()
         .map((snapshot) =>
             snapshot.docs.map((doc) => Settlement.fromFirestore(doc, groupId)).toList());
+  }
+
+  Future<List<Settlement>> getGroupSettlementsOnce(String groupId) async {
+    final snapshot = await _settlementsCollection(groupId)
+        .orderBy('date', descending: true)
+        .get();
+    return snapshot.docs
+        .map((doc) => Settlement.fromFirestore(doc, groupId))
+        .toList();
   }
 
   Future<String> createSettlement({

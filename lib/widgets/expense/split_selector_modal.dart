@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:tabs/config/theme.dart';
 import 'package:tabs/models/models.dart';
 import 'package:tabs/services/exchange_rate_service.dart';
+import 'package:tabs/l10n/app_localizations.dart';
 
 class SplitSelectorModal extends StatefulWidget {
   final ExpenseGroup group;
@@ -194,17 +195,17 @@ class _SplitSelectorModalState extends State<SplitSelectorModal>
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
+                  child: Text(AppLocalizations.of(context)!.cancel),
                 ),
                 Text(
-                  'Split options',
+                  AppLocalizations.of(context)!.splitOptions,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 TextButton(
                   onPressed: _submit,
-                  child: const Text('Done'),
+                  child: Text(AppLocalizations.of(context)!.done),
                 ),
               ],
             ),
@@ -214,10 +215,10 @@ class _SplitSelectorModalState extends State<SplitSelectorModal>
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textSecondary,
             indicatorColor: AppColors.primary,
-            tabs: const [
-              Tab(text: 'Equally'),
-              Tab(text: 'Exact Amounts'),
-              Tab(text: 'Percentages'),
+            tabs: [
+              Tab(text: AppLocalizations.of(context)!.equally),
+              Tab(text: AppLocalizations.of(context)!.exactAmounts),
+              Tab(text: AppLocalizations.of(context)!.percentages),
             ],
           ),
           SizedBox(

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tabs/config/routes.dart';
 import 'package:tabs/config/theme.dart';
 import 'package:tabs/providers/auth_provider.dart';
+import 'package:tabs/l10n/app_localizations.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -78,13 +79,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Create Account',
+                    AppLocalizations.of(context)!.createAccount,
                     style: Theme.of(context).textTheme.displaySmall,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Join Tabs and start splitting expenses',
+                    AppLocalizations.of(context)!.joinTabs,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -99,13 +100,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         TextFormField(
                           controller: _nameController,
                           textCapitalization: TextCapitalization.words,
-                          decoration: const InputDecoration(
-                            labelText: 'Name',
-                            prefixIcon: Icon(Icons.person_outlined),
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context)!.name,
+                            prefixIcon: const Icon(Icons.person_outlined),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your name';
+                              return AppLocalizations.of(context)!.enterName;
                             }
                             return null;
                           },
@@ -114,16 +115,16 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         TextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            prefixIcon: Icon(Icons.email_outlined),
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context)!.email,
+                            prefixIcon: const Icon(Icons.email_outlined),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
+                              return AppLocalizations.of(context)!.enterEmail;
                             }
                             if (!value.contains('@')) {
-                              return 'Please enter a valid email';
+                              return AppLocalizations.of(context)!.validEmail;
                             }
                             return null;
                           },
@@ -133,7 +134,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           controller: _passwordController,
                           obscureText: _obscurePassword,
                           decoration: InputDecoration(
-                            labelText: 'Password',
+                            labelText: AppLocalizations.of(context)!.password,
                             prefixIcon: const Icon(Icons.lock_outlined),
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -150,10 +151,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter a password';
+                              return AppLocalizations.of(context)!.enterPassword;
                             }
                             if (value.length < 6) {
-                              return 'Password must be at least 6 characters';
+                              return AppLocalizations.of(context)!.passwordLength;
                             }
                             return null;
                           },
@@ -163,7 +164,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           controller: _confirmPasswordController,
                           obscureText: _obscureConfirmPassword,
                           decoration: InputDecoration(
-                            labelText: 'Confirm Password',
+                            labelText: AppLocalizations.of(context)!.confirmPassword,
                             prefixIcon: const Icon(Icons.lock_outlined),
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -181,10 +182,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please confirm your password';
+                              return AppLocalizations.of(context)!.confirmPasswordRequired;
                             }
                             if (value != _passwordController.text) {
-                              return 'Passwords do not match';
+                              return AppLocalizations.of(context)!.passwordsDoNotMatch;
                             }
                             return null;
                           },
@@ -203,7 +204,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                       color: Colors.white,
                                     ),
                                   )
-                                : const Text('Create Account'),
+                                : Text(AppLocalizations.of(context)!.createAccount),
                           ),
                         ),
                       ],
@@ -215,12 +216,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Already have an account?',
+                        AppLocalizations.of(context)!.alreadyHaveAccount,
                         style: TextStyle(color: AppColors.textSecondary),
                       ),
                       TextButton(
                         onPressed: () => context.go(AppRoutes.signIn),
-                        child: const Text('Sign In'),
+                        child: Text(AppLocalizations.of(context)!.signIn),
                       ),
                     ],
                   ),

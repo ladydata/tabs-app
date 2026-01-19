@@ -11,6 +11,8 @@ import 'package:tabs/services/exchange_rate_service.dart';
 import 'package:tabs/widgets/common/loading_widget.dart';
 import 'package:tabs/widgets/common/error_widget.dart';
 import 'package:tabs/widgets/group/group_card.dart';
+import 'package:tabs/l10n/app_localizations.dart';
+import 'package:tabs/widgets/profile/settled_groups_dialog.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -22,7 +24,7 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tabs'),
+        title: Text(AppLocalizations.of(context)!.appTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline),
@@ -48,7 +50,7 @@ class HomeScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(AppRoutes.createGroup),
         icon: const Icon(Icons.add),
-        label: const Text('New Group'),
+        label: Text(AppLocalizations.of(context)!.newGroup),
       ),
     );
   }
@@ -67,12 +69,12 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'No groups yet',
+              AppLocalizations.of(context)!.noGroupsYet,
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              'Create a group to start splitting expenses with friends and family.',
+              AppLocalizations.of(context)!.createGroupPrompt,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -82,7 +84,7 @@ class HomeScreen extends ConsumerWidget {
             ElevatedButton.icon(
               onPressed: () => context.push(AppRoutes.createGroup),
               icon: const Icon(Icons.add),
-              label: const Text('Create Group'),
+              label: Text(AppLocalizations.of(context)!.createGroup),
             ),
           ],
         ),
@@ -135,7 +137,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 title: userProfile.when(
                   data: (user) => Text(user?.displayName ?? 'User'),
-                  loading: () => const Text('Loading...'),
+                  loading: () => Text(AppLocalizations.of(context)!.loading),
                   error: (_, __) => const Text('Error'),
                 ),
                 subtitle: userProfile.when(
@@ -146,8 +148,20 @@ class HomeScreen extends ConsumerWidget {
               ),
               const Divider(),
               ListTile(
+                leading: const Icon(Icons.cleaning_services_outlined),
+                title: const Text('Clean Up Inactive Tabs'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  showDialog(
+                    context: context,
+                    builder: (context) => const SettledGroupsDialog(),
+                  );
+                },
+              ),
+              const Divider(),
+              ListTile(
                 leading: const Icon(Icons.logout),
-                title: const Text('Sign Out'),
+                title: Text(AppLocalizations.of(context)!.signOut),
                 onTap: () async {
                   Navigator.pop(context);
                   await ref.read(authNotifierProvider.notifier).signOut();
