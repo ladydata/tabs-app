@@ -147,7 +147,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get selectCategory => 'Selecionar Categoria';
 
   @override
-  String get newGroup => 'Nova Grupo';
+  String get newGroup => 'Novo Grupo';
 
   @override
   String get noGroupsYet => 'Ainda sem grupos';

@@ -1,0 +1,123 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 85.0.0 (93.0.0 available)
+  _flutterfire_internals 1.3.59 (1.3.66 available)
+  analyzer 7.6.0 (10.0.1 available)
+  analyzer_plugin 0.13.4 (0.14.1 available)
+  build 2.5.4 (4.0.4 available)
+  build_config 1.1.2 (1.2.0 available)
+  build_resolvers 2.5.4 (3.0.4 available)
+  build_runner 2.5.4 (2.10.5 available)
+  build_runner_core 9.1.2 (9.3.2 available)
+  characters 1.4.0 (1.4.1 available)
+  cloud_firestore 5.6.12 (6.1.2 available)
+  cloud_firestore_platform_interface 6.6.12 (7.0.6 available)
+  cloud_firestore_web 4.4.12 (5.1.2 available)
+  cloud_functions 5.6.2 (6.0.6 available)
+  cloud_functions_platform_interface 5.8.2 (5.8.9 available)
+  cloud_functions_web 4.11.5 (5.1.2 available)
+  code_assets 0.19.10 (1.0.0 available)
+  custom_lint_core 0.7.5 (0.8.2 available)
+  custom_lint_visitor 1.0.0+7.7.0 (1.0.0+9.0.0 available)
+  dart_style 3.1.1 (3.1.4 available)
+  fake_cloud_firestore 3.1.0 (4.0.1 available)
+  firebase_auth 5.7.0 (6.1.4 available)
+  firebase_auth_platform_interface 7.7.3 (8.1.6 available)
+  firebase_auth_web 5.15.3 (6.1.2 available)
+  firebase_core 3.15.2 (4.4.0 available)
+  firebase_core_web 2.24.1 (3.4.0 available)
+  flutter_riverpod 2.6.1 (3.2.0 available)
+  flutter_slidable 3.1.2 (4.0.3 available)
+  freezed 2.5.8 (3.2.4 available)
+  freezed_annotation 2.4.4 (3.1.0 available)
+  go_router 14.8.1 (17.0.1 available)
+  google_sign_in 6.3.0 (7.2.0 available)
+  google_sign_in_android 6.2.1 (7.2.7 available)
+  google_sign_in_ios 5.9.0 (6.2.5 available)
+  google_sign_in_platform_interface 2.5.0 (3.1.0 available)
+  google_sign_in_web 0.12.4+4 (1.1.0 available)
+  hooks 0.20.5 (1.0.0 available)
+  image 4.5.4 (4.7.2 available)
+  json_serializable 6.9.5 (6.11.4 available)
+  matcher 0.12.17 (0.12.18 available)
+  material_color_utilities 0.11.1 (0.13.0 available)
+  meta 1.17.0 (1.18.0 available)
+  mockito 5.4.6 (5.6.3 available)
+  native_toolchain_c 0.17.2 (0.17.4 available)
+  objective_c 9.2.2 (9.2.3 available)
+  riverpod 2.6.1 (3.2.0 available)
+  riverpod_analyzer_utils 0.5.9 (0.5.10 available)
+  riverpod_annotation 2.6.1 (4.0.1 available)
+  riverpod_generator 2.6.4 (4.0.2 available)
+  rx 0.4.0 (0.5.0 available)
+  source_gen 2.0.0 (4.2.0 available)
+  source_helper 1.3.7 (1.3.10 available)
+  test_api 0.7.7 (0.7.9 available)
+Got dependencies!
+53 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing tabs-app...                                           
+
+   info • Unnecessary use of multiple underscores • lib/config/routes.dart:34:39 • unnecessary_underscores
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/config/theme.dart:135:49 • deprecated_member_use
+   info • 'stream' is deprecated and shouldn't be used. .stream will be removed in 3.0.0. As a replacement, either listen to the provider itself (AsyncValue) or .future • lib/providers/groups_provider.dart:41:53 • deprecated_member_use
+   info • 'stream' is deprecated and shouldn't be used. .stream will be removed in 3.0.0. As a replacement, either listen to the provider itself (AsyncValue) or .future • lib/providers/groups_provider.dart:73:53 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/activity/activity_screen.dart:305:22 • deprecated_member_use
+   info • Unnecessary use of multiple underscores • lib/screens/auth/sign_in_screen.dart:127:41 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/screens/auth/sign_in_screen.dart:127:45 • unnecessary_underscores
+warning • Unused import: 'package:tabs/widgets/common/currency_selector.dart' • lib/screens/expenses/add_expense_screen.dart:14:8 • unused_import
+   info • The private field _selectedPayers could be 'final' • lib/screens/expenses/add_expense_screen.dart:42:21 • prefer_final_fields
+   info • The private field _payerAmountControllers could be 'final' • lib/screens/expenses/add_expense_screen.dart:43:38 • prefer_final_fields
+   info • The private field _splitControllers could be 'final' • lib/screens/expenses/add_expense_screen.dart:46:38 • prefer_final_fields
+warning • The value of the field '_exchangeRate' isn't used • lib/screens/expenses/add_expense_screen.dart:49:11 • unused_field
+warning • The value of the field '_convertedAmount' isn't used • lib/screens/expenses/add_expense_screen.dart:50:11 • unused_field
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/expenses/add_expense_screen.dart:164:75 • deprecated_member_use
+warning • The declaration '_buildSplitInput' isn't referenced • lib/screens/expenses/add_expense_screen.dart:448:10 • unused_element
+warning • The declaration '_selectedPayerCount' isn't referenced • lib/screens/expenses/add_expense_screen.dart:471:11 • unused_element
+warning • The declaration '_splitPayersEvenly' isn't referenced • lib/screens/expenses/add_expense_screen.dart:474:8 • unused_element
+warning • The declaration '_buildPayerAmountInput' isn't referenced • lib/screens/expenses/add_expense_screen.dart:495:10 • unused_element
+warning • The declaration '_buildPayerTotalValidation' isn't referenced • lib/screens/expenses/add_expense_screen.dart:535:10 • unused_element
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/expenses/add_expense_screen.dart:554:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/expenses/add_expense_screen.dart:555:31 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • lib/screens/expenses/add_expense_screen.dart:807:28 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/expenses/add_expense_screen.dart:956:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/expenses/expense_detail_screen.dart:242:64 • deprecated_member_use
+warning • This case is covered by the previous cases • lib/screens/expenses/expense_detail_screen.dart:287:7 • unreachable_switch_case
+   info • The import of 'package:flutter/services.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/screens/export/export_screen.dart:2:8 • unnecessary_import
+warning • Unused import: 'package:tabs/widgets/common/loading_widget.dart' • lib/screens/export/export_screen.dart:9:8 • unused_import
+warning • Unused import: 'package:tabs/services/exchange_rate_service.dart' • lib/screens/groups/create_group_screen.dart:6:8 • unused_import
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/screens/groups/group_detail_screen.dart:206:34 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/groups/group_detail_screen.dart:387:51 • deprecated_member_use
+   info • Unnecessary use of multiple underscores • lib/screens/home/home_screen.dart:144:32 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/screens/home/home_screen.dart:150:30 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/screens/home/home_screen.dart:155:30 • unnecessary_underscores
+  error • The getter 'textTertiary' isn't defined for the type 'AppColors' • lib/screens/settled_tabs/settled_tabs_screen.dart:93:42 • undefined_getter
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/settlements/settle_up_screen.dart:136:60 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/settlements/settle_up_screen.dart:152:52 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/settlements/settle_up_screen.dart:153:52 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/screens/settlements/settle_up_screen.dart:209:15 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/screens/settlements/settle_up_screen.dart:229:15 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • lib/screens/settlements/settle_up_screen.dart:342:28 • use_build_context_synchronously
+warning • The value of the local variable 'anchor' isn't used • lib/services/export_service.dart:59:13 • unused_local_variable
+   info • 'Share' is deprecated and shouldn't be used. Use SharePlus instead • lib/services/export_service.dart:68:13 • deprecated_member_use
+   info • 'shareXFiles' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead • lib/services/export_service.dart:68:19 • deprecated_member_use
+warning • The value of the local variable 'member' isn't used • lib/services/firestore_service.dart:45:11 • unused_local_variable
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/balance/balance_summary.dart:117:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/balance/balance_summary.dart:118:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/common/currency_selector.dart:192:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/expense/expense_list_item.dart:42:51 • deprecated_member_use
+   info • The import of 'package:flutter/services.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/widgets/expense/split_selector_modal.dart:2:8 • unnecessary_import
+   info • Statements in a for should be enclosed in a block • lib/widgets/expense/split_selector_modal.dart:133:56 • curly_braces_in_flow_control_structures
+   info • Statements in a for should be enclosed in a block • lib/widgets/expense/split_selector_modal.dart:134:58 • curly_braces_in_flow_control_structures
+   info • Unnecessary use of multiple underscores • lib/widgets/group/group_card.dart:109:18 • unnecessary_underscores
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/group/group_card.dart:114:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/group/group_card.dart:132:34 • deprecated_member_use
+   info • 'window' is deprecated and shouldn't be used. Use WidgetTester.platformDispatcher or WidgetTester.view instead. Deprecated to prepare for the upcoming multi-window support. This feature was deprecated after v3.9.0-0.1.pre • test/widgets/split_selector_test.dart:27:13 • deprecated_member_use
+   info • 'physicalSizeTestValue' is deprecated and shouldn't be used. Use WidgetTester.view.physicalSize instead. Deprecated to prepare for the upcoming multi-window support. This feature was deprecated after v3.9.0-0.1.pre • test/widgets/split_selector_test.dart:27:20 • deprecated_member_use
+   info • 'window' is deprecated and shouldn't be used. Use WidgetTester.platformDispatcher or WidgetTester.view instead. Deprecated to prepare for the upcoming multi-window support. This feature was deprecated after v3.9.0-0.1.pre • test/widgets/split_selector_test.dart:28:13 • deprecated_member_use
+   info • 'devicePixelRatioTestValue' is deprecated and shouldn't be used. Use WidgetTester.view.devicePixelRatio instead. Deprecated to prepare for the upcoming multi-window support. This feature was deprecated after v3.9.0-0.1.pre • test/widgets/split_selector_test.dart:28:20 • deprecated_member_use
+   info • 'window' is deprecated and shouldn't be used. Use WidgetTester.platformDispatcher or WidgetTester.view instead. Deprecated to prepare for the upcoming multi-window support. This feature was deprecated after v3.9.0-0.1.pre • test/widgets/split_selector_test.dart:33:13 • deprecated_member_use
+   info • 'clearPhysicalSizeTestValue' is deprecated and shouldn't be used. Use WidgetTester.view.resetPhysicalSize() instead. Deprecated to prepare for the upcoming multi-window support. This feature was deprecated after v3.9.0-0.1.pre • test/widgets/split_selector_test.dart:33:20 • deprecated_member_use
+   info • 'window' is deprecated and shouldn't be used. Use WidgetTester.platformDispatcher or WidgetTester.view instead. Deprecated to prepare for the upcoming multi-window support. This feature was deprecated after v3.9.0-0.1.pre • test/widgets/split_selector_test.dart:34:13 • deprecated_member_use
+   info • 'clearDevicePixelRatioTestValue' is deprecated and shouldn't be used. Use WidgetTester.view.resetDevicePixelRatio() instead. Deprecated to prepare for the upcoming multi-window support. This feature was deprecated after v3.9.0-0.1.pre • test/widgets/split_selector_test.dart:34:20 • deprecated_member_use
+
