@@ -139,6 +139,13 @@ class _SettledTabsScreenState extends ConsumerState<SettledTabsScreen> {
                         ),
                         const SizedBox(width: 4),
                         Icon(Icons.people_outline, size: 16, color: AppColors.textSecondary),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          color: AppColors.textSecondary,
+                          tooltip: 'Delete',
+                          onPressed: () => _deleteGroup(group),
+                        ),
                       ],
                     ),
                   ),
