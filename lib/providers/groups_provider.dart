@@ -45,9 +45,15 @@ final activeGroupsStreamProvider = StreamProvider<List<ExpenseGroup>>((ref) asyn
 
     for (final group in groups) {
       // Get balances to check if settled
-      final balancesAsync = ref.read(groupBalancesProvider(group.id));
-      final balances = balancesAsync.valueOrNull ?? {};
-      if (!_isGroupSettledAndOld(group, balances)) {
+      // If balances can't be fetched (error/loading), treat as active
+      try {
+        final balancesAsync = ref.read(groupBalancesProvider(group.id));
+        final balances = balancesAsync.valueOrNull ?? {};
+        if (!_isGroupSettledAndOld(group, balances)) {
+          activeGroups.add(group);
+        }
+      } catch (_) {
+        // On error, treat group as active (show it in main list)
         activeGroups.add(group);
       }
     }
@@ -71,10 +77,15 @@ final settledGroupsStreamProvider = StreamProvider<List<ExpenseGroup>>((ref) asy
 
     for (final group in groups) {
       // Get balances to check if settled
-      final balancesAsync = ref.read(groupBalancesProvider(group.id));
-      final balances = balancesAsync.valueOrNull ?? {};
-      if (_isGroupSettledAndOld(group, balances)) {
-        settledGroups.add(group);
+      // If balances can't be fetched (error/loading), don't include in settled
+      try {
+        final balancesAsync = ref.read(groupBalancesProvider(group.id));
+        final balances = balancesAsync.valueOrNull ?? {};
+        if (_isGroupSettledAndOld(group, balances)) {
+          settledGroups.add(group);
+        }
+      } catch (_) {
+        // On error, don't include in settled groups (treat as active)
       }
     }
 

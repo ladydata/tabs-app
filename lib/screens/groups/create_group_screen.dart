@@ -38,7 +38,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
         );
 
     if (groupId != null && mounted) {
-      context.go('/groups/$groupId');
+      context.push('/groups/$groupId');
     }
   }
 
