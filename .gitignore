@@ -1,6 +1,9 @@
 # Project planning docs (local only)
 DEVELOPMENT_PLAN.md
 
+# Git worktrees
+.worktrees/
+
 # Miscellaneous
 *.class
 *.log
