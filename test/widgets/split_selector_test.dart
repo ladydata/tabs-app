@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:tabs/l10n/app_localizations.dart';
 import 'package:tabs/models/models.dart';
 import 'package:tabs/widgets/expense/split_selector_modal.dart';
 
@@ -38,6 +40,13 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: Builder(
             builder: (context) => ElevatedButton(
@@ -98,6 +107,13 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: Builder(
             builder: (context) => ElevatedButton(
@@ -134,13 +150,7 @@ void main() {
     await tester.tap(find.text('Exact Amounts'));
     await tester.pumpAndSettle();
 
-    // Check checkboxes to enable inputs
-    final checkboxes = find.byType(Checkbox);
-    await tester.tap(checkboxes.at(0)); // check p1
-    await tester.tap(checkboxes.at(1)); // check p2
-    await tester.pump();
-
-    // Enter amounts
+    // Enter amounts directly (no checkboxes in exact tab - selection is implicit)
     final inputs = find.byType(TextField);
     await tester.enterText(inputs.at(0), '30');
     await tester.enterText(inputs.at(1), '20');
@@ -153,8 +163,8 @@ void main() {
     // Verify result
     expect(resultingType, SplitType.exact);
     expect(resultingSelection['p1'], true);
-    expect(resultingSelection['p2'], true); // Both selected
-    
+    expect(resultingSelection['p2'], true); // Both selected (based on values > 0)
+
     // Verify controllers updated (persistence test)
     expect(controllers['p1']!.text, '30');
     expect(controllers['p2']!.text, '20');
@@ -170,6 +180,13 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: Builder(
             builder: (context) => ElevatedButton(
@@ -206,13 +223,7 @@ void main() {
     await tester.tap(find.text('Percentages'));
     await tester.pumpAndSettle();
 
-    // Check checkboxes
-    final checkboxes = find.byType(Checkbox);
-    await tester.tap(checkboxes.at(0));
-    await tester.tap(checkboxes.at(1));
-    await tester.pump();
-
-    // Enter percentages
+    // Enter percentages directly (no checkboxes in percentage tab - selection is implicit)
     final inputs = find.byType(TextField);
     await tester.enterText(inputs.at(0), '10');
     await tester.enterText(inputs.at(1), '90');
@@ -226,7 +237,7 @@ void main() {
     expect(resultingType, SplitType.percentage);
     expect(resultingSelection['p1'], true); // p1 pays 10%
     expect(resultingSelection['p2'], true); // p2 pays 90%
-    
+
     expect(controllers['p1']!.text, '10');
     expect(controllers['p2']!.text, '90');
   });
@@ -242,6 +253,13 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: Builder(
               builder: (context) => ElevatedButton(
@@ -271,16 +289,10 @@ void main() {
       await tester.tap(find.text('Open Modal'));
       await tester.pumpAndSettle();
 
-      // Verify we are on Exact tab
-      // Verify p1 is checked and has value 50
+      // Verify we are on Exact tab with TextFields (not checkboxes)
+      expect(find.byType(TextField), findsNWidgets(2));
+
+      // Verify p1 has value 50 persisted
       expect(find.text('50'), findsOneWidget);
-      
-      // Verify exact tab is active (Checkboxes present)
-      expect(find.byType(Checkbox), findsNWidgets(2));
-      
-      // Verify p1 checkbox is checked
-      final checkboxes = tester.widgetList<Checkbox>(find.byType(Checkbox));
-      expect(checkboxes.first.value, true); // p1
-      expect(checkboxes.last.value, false); // p2
     });
 }

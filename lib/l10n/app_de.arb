@@ -53,5 +53,19 @@
     "createGroupPrompt": "Erstelle eine Gruppe, um Ausgaben mit Freunden und Familie zu teilen.",
     "createGroup": "Gruppe erstellen",
     "signOut": "Abmelden",
-    "loading": "Lädt..."
+    "loading": "Lädt...",
+
+    "settledTabs": "Abgerechnete Tabs",
+    "tapToView": "Tippen zum Anzeigen",
+    "settledDaysAgo": "Vor {days} Tagen abgerechnet",
+    "@settledDaysAgo": {
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "tabDeleted": "Tab gelöscht",
+    "undo": "Rückgängig",
+    "noSettledTabs": "Keine abgerechneten Tabs"
 }

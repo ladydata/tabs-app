@@ -57,6 +57,14 @@ class AppTheme {
         centerTitle: false,
       ),
 
+      // TabBar (for tabs inside AppBar)
+      tabBarTheme: const TabBarThemeData(
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white70,
+        indicatorColor: Colors.white,
+        indicatorSize: TabBarIndicatorSize.tab,
+      ),
+
       // Cards
       cardTheme: CardThemeData(
         elevation: 2,

@@ -12,6 +12,7 @@ import 'package:tabs/screens/expenses/expense_detail_screen.dart';
 import 'package:tabs/screens/settlements/settle_up_screen.dart';
 import 'package:tabs/screens/activity/activity_screen.dart';
 import 'package:tabs/screens/export/export_screen.dart';
+import 'package:tabs/screens/settled_tabs/settled_tabs_screen.dart';
 
 class AppRoutes {
   static const signIn = '/sign-in';
@@ -25,6 +26,7 @@ class AppRoutes {
   static const settleUp = '/groups/:groupId/settle';
   static const activity = '/groups/:groupId/activity';
   static const export = '/groups/:groupId/export';
+  static const settledTabs = '/settled-tabs';
 }
 
 class AuthNotifierListenable extends ChangeNotifier {
@@ -67,6 +69,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.home,
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.settledTabs,
+        builder: (context, state) => const SettledTabsScreen(),
       ),
       GoRoute(
         path: AppRoutes.createGroup,

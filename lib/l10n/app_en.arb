@@ -53,5 +53,19 @@
     "createGroupPrompt": "Create a group to start splitting expenses with friends and family.",
     "createGroup": "Create Group",
     "signOut": "Sign Out",
-    "loading": "Loading..."
+    "loading": "Loading...",
+
+    "settledTabs": "Settled Tabs",
+    "tapToView": "Tap to view",
+    "settledDaysAgo": "Settled {days} days ago",
+    "@settledDaysAgo": {
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "tabDeleted": "Tab deleted",
+    "undo": "Undo",
+    "noSettledTabs": "No settled tabs"
 }

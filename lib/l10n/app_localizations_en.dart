@@ -164,4 +164,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loading => 'Loading...';
+
+  @override
+  String get settledTabs => 'Settled Tabs';
+
+  @override
+  String get tapToView => 'Tap to view';
+
+  @override
+  String settledDaysAgo(int days) {
+    return 'Settled $days days ago';
+  }
+
+  @override
+  String get tabDeleted => 'Tab deleted';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get noSettledTabs => 'No settled tabs';
 }

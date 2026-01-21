@@ -53,5 +53,19 @@
     "createGroupPrompt": "Crie um grupo para começar a dividir despesas com amigos e família.",
     "createGroup": "Criar Grupo",
     "signOut": "Sair",
-    "loading": "Carregando..."
+    "loading": "Carregando...",
+
+    "settledTabs": "Grupos Quitados",
+    "tapToView": "Toque para ver",
+    "settledDaysAgo": "Quitado há {days} dias",
+    "@settledDaysAgo": {
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "tabDeleted": "Grupo excluído",
+    "undo": "Desfazer",
+    "noSettledTabs": "Nenhum grupo quitado"
 }

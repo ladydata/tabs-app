@@ -411,6 +411,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading...'**
   String get loading;
+
+  /// No description provided for @settledTabs.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled Tabs'**
+  String get settledTabs;
+
+  /// No description provided for @tapToView.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to view'**
+  String get tapToView;
+
+  /// No description provided for @settledDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled {days} days ago'**
+  String settledDaysAgo(int days);
+
+  /// No description provided for @tabDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab deleted'**
+  String get tabDeleted;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @noSettledTabs.
+  ///
+  /// In en, this message translates to:
+  /// **'No settled tabs'**
+  String get noSettledTabs;
 }
 
 class _AppLocalizationsDelegate
