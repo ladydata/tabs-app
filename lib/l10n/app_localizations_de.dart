@@ -164,4 +164,24 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get loading => 'Lädt...';
+
+  @override
+  String get settledTabs => 'Abgerechnete Tabs';
+
+  @override
+  String get tapToView => 'Tippen zum Anzeigen';
+
+  @override
+  String settledDaysAgo(int days) {
+    return 'Vor $days Tagen abgerechnet';
+  }
+
+  @override
+  String get tabDeleted => 'Tab gelöscht';
+
+  @override
+  String get undo => 'Rückgängig';
+
+  @override
+  String get noSettledTabs => 'Keine abgerechneten Tabs';
 }

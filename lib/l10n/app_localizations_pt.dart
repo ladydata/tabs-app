@@ -164,4 +164,24 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get loading => 'Carregando...';
+
+  @override
+  String get settledTabs => 'Grupos Quitados';
+
+  @override
+  String get tapToView => 'Toque para ver';
+
+  @override
+  String settledDaysAgo(int days) {
+    return 'Quitado há $days dias';
+  }
+
+  @override
+  String get tabDeleted => 'Grupo excluído';
+
+  @override
+  String get undo => 'Desfazer';
+
+  @override
+  String get noSettledTabs => 'Nenhum grupo quitado';
 }
