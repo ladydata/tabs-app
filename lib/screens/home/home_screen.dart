@@ -6,14 +6,11 @@ import 'package:tabs/config/theme.dart';
 import 'package:tabs/models/models.dart';
 import 'package:tabs/providers/auth_provider.dart';
 import 'package:tabs/providers/groups_provider.dart';
-import 'package:tabs/providers/balances_provider.dart';
-import 'package:tabs/services/exchange_rate_service.dart';
 import 'package:tabs/widgets/common/loading_widget.dart';
 import 'package:tabs/widgets/common/error_widget.dart';
 import 'package:tabs/widgets/group/group_card.dart';
 import 'package:tabs/widgets/group/settled_tabs_card.dart';
 import 'package:tabs/l10n/app_localizations.dart';
-import 'package:tabs/widgets/profile/settled_groups_dialog.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -21,7 +18,6 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final groupsAsync = ref.watch(activeGroupsStreamProvider);
-    final userProfile = ref.watch(currentUserProfileProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -158,18 +154,6 @@ class HomeScreen extends ConsumerWidget {
                   loading: () => null,
                   error: (_, __) => null,
                 ),
-              ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.cleaning_services_outlined),
-                title: const Text('Clean Up Inactive Tabs'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  showDialog(
-                    context: context,
-                    builder: (context) => const SettledGroupsDialog(),
-                  );
-                },
               ),
               const Divider(),
               ListTile(
