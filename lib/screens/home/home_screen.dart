@@ -11,6 +11,7 @@ import 'package:tabs/services/exchange_rate_service.dart';
 import 'package:tabs/widgets/common/loading_widget.dart';
 import 'package:tabs/widgets/common/error_widget.dart';
 import 'package:tabs/widgets/group/group_card.dart';
+import 'package:tabs/widgets/group/settled_tabs_card.dart';
 import 'package:tabs/l10n/app_localizations.dart';
 import 'package:tabs/widgets/profile/settled_groups_dialog.dart';
 
@@ -19,7 +20,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final groupsAsync = ref.watch(userGroupsProvider);
+    final groupsAsync = ref.watch(activeGroupsStreamProvider);
     final userProfile = ref.watch(currentUserProfileProvider);
 
     return Scaffold(
@@ -34,18 +35,30 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: groupsAsync.when(
-        loading: () => const LoadingWidget(),
-        error: (error, _) => AppErrorWidget(
-          message: error.toString(),
-          onRetry: () => ref.invalidate(userGroupsProvider),
-        ),
-        data: (groups) {
-          if (groups.isEmpty) {
-            return _buildEmptyState(context);
-          }
-          return _buildGroupsList(context, ref, groups);
-        },
+      body: Stack(
+        children: [
+          groupsAsync.when(
+            loading: () => const LoadingWidget(),
+            error: (error, _) => AppErrorWidget(
+              message: error.toString(),
+              onRetry: () => ref.invalidate(activeGroupsStreamProvider),
+            ),
+            data: (groups) {
+              if (groups.isEmpty) {
+                return _buildEmptyState(context);
+              }
+              return _buildGroupsList(context, ref, groups);
+            },
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SettledTabsCard(
+              onTap: () => context.push(AppRoutes.settledTabs),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(AppRoutes.createGroup),
@@ -98,7 +111,7 @@ class HomeScreen extends ConsumerWidget {
     List<ExpenseGroup> groups,
   ) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 100),
       itemCount: groups.length,
       itemBuilder: (context, index) {
         final group = groups[index];
