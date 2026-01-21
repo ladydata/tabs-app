@@ -1,7 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabs/models/models.dart';
 import 'package:tabs/providers/auth_provider.dart';
+import 'package:tabs/providers/balances_provider.dart';
 import 'package:tabs/services/firestore_service.dart';
+
+const int kSettledDaysThreshold = 30;
+
+bool _isGroupSettledAndOld(ExpenseGroup group, Map<String, double> balances) {
+  // Check if all balances are ~0
+  final isSettled = balances.values.every((b) => b.abs() < 0.01);
+  if (!isSettled) return false;
+
+  // Check if 30+ days since last activity
+  final daysSinceUpdate = DateTime.now().difference(group.updatedAt).inDays;
+  return daysSinceUpdate >= kSettledDaysThreshold;
+}
 
 // Firestore service provider
 final firestoreServiceProvider = Provider<FirestoreService>((ref) {
@@ -15,6 +28,58 @@ final userGroupsProvider = StreamProvider<List<ExpenseGroup>>((ref) {
 
   final firestoreService = ref.watch(firestoreServiceProvider);
   return firestoreService.getUserGroups(user.uid);
+});
+
+/// Groups that are active (not settled or settled < 30 days)
+final activeGroupsStreamProvider = StreamProvider<List<ExpenseGroup>>((ref) async* {
+  final user = ref.watch(currentUserProvider);
+  if (user == null) {
+    yield [];
+    return;
+  }
+
+  final groupsStream = ref.watch(userGroupsProvider.stream);
+
+  await for (final groups in groupsStream) {
+    final activeGroups = <ExpenseGroup>[];
+
+    for (final group in groups) {
+      // Get balances to check if settled
+      final balancesAsync = ref.read(groupBalancesProvider(group.id));
+      final balances = balancesAsync.valueOrNull ?? {};
+      if (!_isGroupSettledAndOld(group, balances)) {
+        activeGroups.add(group);
+      }
+    }
+
+    yield activeGroups;
+  }
+});
+
+/// Groups that are settled for 30+ days (hidden from main list)
+final settledGroupsStreamProvider = StreamProvider<List<ExpenseGroup>>((ref) async* {
+  final user = ref.watch(currentUserProvider);
+  if (user == null) {
+    yield [];
+    return;
+  }
+
+  final groupsStream = ref.watch(userGroupsProvider.stream);
+
+  await for (final groups in groupsStream) {
+    final settledGroups = <ExpenseGroup>[];
+
+    for (final group in groups) {
+      // Get balances to check if settled
+      final balancesAsync = ref.read(groupBalancesProvider(group.id));
+      final balances = balancesAsync.valueOrNull ?? {};
+      if (_isGroupSettledAndOld(group, balances)) {
+        settledGroups.add(group);
+      }
+    }
+
+    yield settledGroups;
+  }
 });
 
 // Single group stream provider
