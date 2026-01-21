@@ -17,6 +17,8 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Prefetch user profile to avoid loading delay in menu
+    ref.watch(currentUserProfileProvider);
     final groupsAsync = ref.watch(activeGroupsStreamProvider);
 
     return Scaffold(
@@ -123,49 +125,53 @@ class HomeScreen extends ConsumerWidget {
   }
 
   void _showProfileMenu(BuildContext context, WidgetRef ref) {
-    final userProfile = ref.read(currentUserProfileProvider);
-
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: AppColors.primary,
-                  child: userProfile.when(
-                    data: (user) => Text(
-                      user?.displayName.substring(0, 1).toUpperCase() ?? '?',
-                      style: const TextStyle(color: Colors.white),
+        return Consumer(
+          builder: (context, ref, child) {
+            final userProfile = ref.watch(currentUserProfileProvider);
+            
+            return SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: AppColors.primary,
+                      child: userProfile.when(
+                        data: (user) => Text(
+                          user?.displayName.substring(0, 1).toUpperCase() ?? '?',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, __) => const Text('?'),
+                      ),
                     ),
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const Text('?'),
+                    title: userProfile.when(
+                      data: (user) => Text(user?.displayName ?? 'User'),
+                      loading: () => Text(AppLocalizations.of(context)!.loading),
+                      error: (_, __) => const Text('Error'),
+                    ),
+                    subtitle: userProfile.when(
+                      data: (user) => Text(user?.email ?? ''),
+                      loading: () => null,
+                      error: (_, __) => null,
+                    ),
                   ),
-                ),
-                title: userProfile.when(
-                  data: (user) => Text(user?.displayName ?? 'User'),
-                  loading: () => Text(AppLocalizations.of(context)!.loading),
-                  error: (_, __) => const Text('Error'),
-                ),
-                subtitle: userProfile.when(
-                  data: (user) => Text(user?.email ?? ''),
-                  loading: () => null,
-                  error: (_, __) => null,
-                ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.logout),
+                    title: Text(AppLocalizations.of(context)!.signOut),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      await ref.read(authNotifierProvider.notifier).signOut();
+                    },
+                  ),
+                ],
               ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.logout),
-                title: Text(AppLocalizations.of(context)!.signOut),
-                onTap: () async {
-                  Navigator.pop(context);
-                  await ref.read(authNotifierProvider.notifier).signOut();
-                },
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
