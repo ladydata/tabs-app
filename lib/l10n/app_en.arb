@@ -67,5 +67,6 @@
     },
     "tabDeleted": "Tab deleted",
     "undo": "Undo",
-    "noSettledTabs": "No settled tabs"
+    "noSettledTabs": "No settled tabs",
+    "settledTabsEmptySubtitle": "Groups appear here 30 days after they are settled"
 }

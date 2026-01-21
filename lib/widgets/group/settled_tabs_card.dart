@@ -50,7 +50,7 @@ class SettledTabsCard extends ConsumerWidget {
                             ),
                           ),
                           Text(
-                            AppLocalizations.of(context)!.tapToView,
+                            AppLocalizations.of(context)!.settledTabsEmptySubtitle,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppColors.textDisabled,
                             ),

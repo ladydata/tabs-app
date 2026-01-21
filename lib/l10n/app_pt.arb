@@ -67,5 +67,6 @@
     },
     "tabDeleted": "Grupo excluído",
     "undo": "Desfazer",
-    "noSettledTabs": "Nenhum grupo quitado"
+    "noSettledTabs": "Nenhum grupo quitado",
+    "settledTabsEmptySubtitle": "Grupos aparecem aqui 30 dias após serem quitados"
 }

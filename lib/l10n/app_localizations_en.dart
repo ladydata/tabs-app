@@ -184,4 +184,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noSettledTabs => 'No settled tabs';
+
+  @override
+  String get settledTabsEmptySubtitle =>
+      'Groups appear here 30 days after they are settled';
 }

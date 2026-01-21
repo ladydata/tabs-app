@@ -447,6 +447,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No settled tabs'**
   String get noSettledTabs;
+
+  /// No description provided for @settledTabsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups appear here 30 days after they are settled'**
+  String get settledTabsEmptySubtitle;
 }
 
 class _AppLocalizationsDelegate

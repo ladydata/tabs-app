@@ -184,4 +184,8 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get noSettledTabs => 'Nenhum grupo quitado';
+
+  @override
+  String get settledTabsEmptySubtitle =>
+      'Grupos aparecem aqui 30 dias após serem quitados';
 }

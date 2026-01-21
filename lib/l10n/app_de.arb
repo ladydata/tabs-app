@@ -67,5 +67,6 @@
     },
     "tabDeleted": "Tab gelöscht",
     "undo": "Rückgängig",
-    "noSettledTabs": "Keine abgerechneten Tabs"
+    "noSettledTabs": "Keine abgerechneten Tabs",
+    "settledTabsEmptySubtitle": "Gruppen erscheinen hier 30 Tage nach der Abrechnung"
 }

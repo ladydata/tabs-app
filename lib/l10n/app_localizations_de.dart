@@ -184,4 +184,8 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get noSettledTabs => 'Keine abgerechneten Tabs';
+
+  @override
+  String get settledTabsEmptySubtitle =>
+      'Gruppen erscheinen hier 30 Tage nach der Abrechnung';
 }
