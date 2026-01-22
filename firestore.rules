@@ -98,6 +98,11 @@ service cloud.firestore {
 
       // Activity subcollection
       match /activity/{activityId} {
+        // Helper to check if user is admin of parent group
+        function isGroupAdmin() {
+          return get(/databases/$(database)/documents/groups/$(groupId)).data.members[request.auth.uid].role == 'admin';
+        }
+
         // Members can read activity
         allow read: if isAuthenticated() &&
                        request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
@@ -106,8 +111,11 @@ service cloud.firestore {
         allow create: if isAuthenticated() &&
                          request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
 
-        // Activity logs cannot be updated or deleted
-        allow update, delete: if false;
+        // Activity logs cannot be updated
+        allow update: if false;
+
+        // Only admins can delete activity logs (for group deletion)
+        allow delete: if isAuthenticated() && isGroupAdmin();
       }
     }
 
